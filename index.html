@@ -119,6 +119,34 @@
                 fullscreenButton.onclick = () => {
                   unityInstance.SetFullscreen(1);
                 };
+                   /*
+                    * 接收外層 Alpha-E 操作面板傳來的指令。
+                    */
+                  window.addEventListener("message", function (event) {
+                      const message = event.data;
+
+                      if (
+                          !message ||
+                          message.source !== "alpha-e-parent"
+                      ) {
+                          return;
+                      }
+
+                      console.log("Unity WebGL 收到：", message);
+
+                      if (message.type === "SetPower") {
+                          const powerCommand =
+                              message.action ||
+                              message.value ||
+                              "off";
+
+                          unityInstance.SendMessage(
+                              "AlphaEWebController",
+                              "SetPower",
+                              powerCommand
+                          );
+                      }
+                  });
               }).catch((message) => {
                 alert(message);
               });
