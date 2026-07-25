@@ -119,9 +119,10 @@
                 fullscreenButton.onclick = () => {
                   unityInstance.SetFullscreen(1);
                 };
-                   /*
-                    * 接收外層 Alpha-E 操作面板傳來的指令。
-                    */
+                  /*
+   * 接收外層 Alpha-E 操作面板傳來的控制指令，
+   * 再轉送給 Unity 場景中的 AlphaEWebController。
+   */
                   window.addEventListener("message", function (event) {
                       const message = event.data;
 
@@ -134,16 +135,36 @@
 
                       console.log("Unity WebGL 收到：", message);
 
+                      /* 總電源 */
                       if (message.type === "SetPower") {
-                          const powerCommand =
-                              message.action ||
-                              message.value ||
-                              "off";
-
                           unityInstance.SendMessage(
                               "AlphaEWebController",
                               "SetPower",
-                              powerCommand
+                              message.action || "off"
+                          );
+                      }
+
+                      /* Rough Pump */
+                      if (
+                          message.type === "OperateEquipment" &&
+                          message.equipmentId === "rough_pump"
+                      ) {
+                          unityInstance.SendMessage(
+                              "AlphaEWebController",
+                              "SetRoughPump",
+                              message.action || "off"
+                          );
+                      }
+
+                      /* Cooler */
+                      if (
+                          message.type === "OperateEquipment" &&
+                          message.equipmentId === "cooler"
+                      ) {
+                          unityInstance.SendMessage(
+                              "AlphaEWebController",
+                              "SetCooler",
+                              message.action || "off"
                           );
                       }
                   });

@@ -2245,12 +2245,20 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   powerControlGroup: {fileID: 2103437125}
+  vacuumChamberGroup: {fileID: 519833105}
+  coolerGroup: {fileID: 127886479}
   coolerFan: {fileID: 1066497965465956890}
   fanRotationAxis: {x: 0, y: 0, z: 1}
-  targetFanSpeed: 300
+  targetFanSpeed: 500
   fanAcceleration: 45
-  powerEmissionColor: {r: 0.1, g: 0.8, b: 1, a: 1}
-  emissionIntensity: 3
+  powerEmissionColor: {r: 0.101960786, g: 0.8, b: 1, a: 1}
+  powerEmissionIntensity: 1
+  roughPumpEmissionColor: {r: 0.101960786, g: 0.8, b: 1, a: 1}
+  roughPumpEmissionIntensity: 1
+  coolerEmissionColor: {r: 0.101960786, g: 0.8, b: 1, a: 1}
+  coolerEmissionIntensity: 1
+  completedEmissionColor: {r: 0.101960786, g: 0.8, b: 1, a: 1}
+  completedEmissionIntensity: 0.3
 --- !u!4 &2023312916
 Transform:
   m_ObjectHideFlags: 0
