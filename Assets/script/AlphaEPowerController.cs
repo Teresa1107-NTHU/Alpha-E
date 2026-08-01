@@ -10,6 +10,11 @@ using UnityEngine;
 
 public class AlphaEPowerController : MonoBehaviour
 {
+    [Header("教學流程管理器")]
+    [SerializeField]
+    private AlphaEFlowManager flowManager;
+
+
     [Header("Power Control 模型")]
     [SerializeField]
     private GameObject powerControlGroup;
@@ -52,6 +57,14 @@ public class AlphaEPowerController : MonoBehaviour
     [SerializeField]
     private float roughPumpEmissionIntensity = 1f;
 
+    [Header("Turbo Pump 發光設定")]
+    [SerializeField]
+    private Color turboPumpEmissionColor =
+    new Color(0.25f, 0.25f, 0.85f);
+
+    [SerializeField]
+    private float turboPumpEmissionIntensity = 1f;
+
     [Header("Cooler 發光設定")]
     [SerializeField]
     private Color coolerEmissionColor =
@@ -69,9 +82,9 @@ public class AlphaEPowerController : MonoBehaviour
     private float completedEmissionIntensity = 1f;
 
 
-
     private bool isPowerOn;
     private bool isRoughPumpOn;
+    private bool isTurboPumpOn;
     private bool isCoolerOn;
     private float currentFanSpeed;
 
@@ -164,7 +177,18 @@ public class AlphaEPowerController : MonoBehaviour
     public void SetPower(string command)
     {
         bool turnOn =
-            command.Trim().ToLower() == "on";
+        command.Trim().ToLower() == "on";
+
+        if (
+        turnOn &&
+        flowManager != null &&
+        !flowManager.CanOperate(
+            AlphaEFlowManager.AlphaEStep.Power
+        )
+    )
+        {
+            return;
+        }
 
         isPowerOn = turnOn;
 
@@ -177,7 +201,14 @@ public class AlphaEPowerController : MonoBehaviour
                 powerEmissionColor,
                 powerEmissionIntensity
             );
+            if (flowManager != null)
+            {
+                flowManager.CompleteStep(
+                    AlphaEFlowManager.AlphaEStep.Power
+                );
+            }
         }
+
         else
         {
             // 關閉 Power 發光
@@ -209,7 +240,13 @@ public class AlphaEPowerController : MonoBehaviour
 
             // 重設所有子系統狀態
             isRoughPumpOn = false;
+            isTurboPumpOn = false;
             isCoolerOn = false;
+
+            if (flowManager != null)
+            {
+                flowManager.ResetFlow();
+            }
         }
 
         Debug.Log(
@@ -232,6 +269,17 @@ public class AlphaEPowerController : MonoBehaviour
     {
         bool turnOn =
             command.Trim().ToLower() == "on";
+
+        if (
+            turnOn &&
+            flowManager != null &&
+            !flowManager.CanOperate(
+            AlphaEFlowManager.AlphaEStep.RoughPump
+            )
+)
+        {
+            return;
+        }
 
         if (turnOn && !isPowerOn)
         {
@@ -263,9 +311,19 @@ public class AlphaEPowerController : MonoBehaviour
                 roughPumpEmissionColor,
                 roughPumpEmissionIntensity
             );
+
+            if (flowManager != null)
+            {
+                flowManager.CompleteStep(
+                    AlphaEFlowManager.AlphaEStep.RoughPump
+                );
+            }
         }
         else
         {
+            // Rough Pump 關閉時，Turbo Pump 也必須停止
+            isTurboPumpOn = false;
+
             // Rough Pump 關閉
             ApplyEmission(
                 vacuumMaterials,
@@ -294,10 +352,109 @@ public class AlphaEPowerController : MonoBehaviour
     }
 
     /*
- * 控制 Cooler：
- * Cooler On 時讓 Cooler_Group 發亮，
- * 並讓 CoolingFan 慢慢加速旋轉。
- */
+    * 控制 Turbo Pump 高真空步驟。
+    *
+    * Turbo Pump On：
+    * 1. 必須先完成 Rough Pump。
+    * 2. VacuumChamber_Group 改成藍紫色，
+    *    表示系統進入高真空階段。
+    * 3. 流程推進到 Gas Supply。
+    *
+    * Turbo Pump Off：
+    * 若 Rough Pump 仍在運作，
+    * VacuumChamber_Group 改成淡暗藍色完成狀態。
+    */
+    public void SetTurboPump(string command)
+    {
+        bool turnOn =
+            command.Trim().ToLower() == "on";
+
+        if (
+            turnOn &&
+            flowManager != null &&
+            !flowManager.CanOperate(
+                AlphaEFlowManager.AlphaEStep.TurboPump
+            )
+        )
+        {
+            return;
+        }
+
+        if (turnOn && !isPowerOn)
+        {
+            Debug.LogWarning(
+                "無法啟動 Turbo Pump：請先開啟 Power。"
+            );
+
+            return;
+        }
+
+        if (turnOn && !isRoughPumpOn)
+        {
+            Debug.LogWarning(
+                "無法啟動 Turbo Pump：請先啟動 Rough Pump。"
+            );
+
+            return;
+        }
+
+        isTurboPumpOn = turnOn;
+
+        if (turnOn)
+        {
+            // Vacuum Chamber 切換成高真空階段顏色
+            ApplyEmission(
+                vacuumMaterials,
+                vacuumOriginalEmissionColors,
+                true,
+                turboPumpEmissionColor,
+                turboPumpEmissionIntensity
+            );
+
+            if (flowManager != null)
+            {
+                flowManager.CompleteStep(
+                    AlphaEFlowManager.AlphaEStep.TurboPump
+                );
+            }
+        }
+        else
+        {
+            if (isRoughPumpOn)
+            {
+                // Rough Pump 仍在運作，
+                // 真空系統改成淡暗藍色完成狀態
+                ApplyEmission(
+                    vacuumMaterials,
+                    vacuumOriginalEmissionColors,
+                    true,
+                    completedEmissionColor,
+                    completedEmissionIntensity
+                );
+            }
+            else
+            {
+                // Rough Pump 也已關閉，恢復原材質
+                ApplyEmission(
+                    vacuumMaterials,
+                    vacuumOriginalEmissionColors,
+                    false,
+                    turboPumpEmissionColor,
+                    turboPumpEmissionIntensity
+                );
+            }
+        }
+
+        Debug.Log(
+            $"Turbo Pump：{(turnOn ? "On" : "Off")}"
+        );
+    }
+
+    /*
+    * 控制 Cooler：
+    * Cooler On 時讓 Cooler_Group 發亮，
+    * 並讓 CoolingFan 慢慢加速旋轉。
+    */
     public void SetCooler(string command)
     {
         bool turnOn =
@@ -463,6 +620,18 @@ public class AlphaEPowerController : MonoBehaviour
     private void TestRoughPumpOff()
     {
         SetRoughPump("off");
+    }
+
+    [ContextMenu("Test Turbo Pump On")]
+    private void TestTurboPumpOn()
+    {
+        SetTurboPump("on");
+    }
+
+    [ContextMenu("Test Turbo Pump Off")]
+    private void TestTurboPumpOff()
+    {
+        SetTurboPump("off");
     }
 
     [ContextMenu("Test Cooler On")]

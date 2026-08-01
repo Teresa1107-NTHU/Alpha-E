@@ -203,6 +203,52 @@ Transform:
   - {fileID: 7458880654664251961}
   m_Father: {fileID: 1309131683}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!1 &108012192
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 108012194}
+  - component: {fileID: 108012193}
+  m_Layer: 0
+  m_Name: AlphaEFlowManager
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!114 &108012193
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 108012192}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 8d566bbbd5a2c894fa680deda08ada12, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  enforceOrder: 1
+  currentStep: 0
+--- !u!4 &108012194
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 108012192}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: -0.2985971, y: 0.67969424, z: -3.1427612}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &127886479
 GameObject:
   m_ObjectHideFlags: 0
@@ -2244,6 +2290,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: d2c31eb5ac3af4940a08124722efe90b, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  flowManager: {fileID: 108012193}
   powerControlGroup: {fileID: 2103437125}
   vacuumChamberGroup: {fileID: 519833105}
   coolerGroup: {fileID: 127886479}
@@ -242141,3 +242188,4 @@ SceneRoots:
   - {fileID: 4677800260541522758}
   - {fileID: 539309021}
   - {fileID: 2023312916}
+  - {fileID: 108012194}
