@@ -35,6 +35,10 @@ public class AlphaEPowerController : MonoBehaviour
     [SerializeField]
     private Transform coolerFan;
 
+    [Header("High Voltage 對應區域")]
+    [SerializeField]
+    private GameObject highVoltageGroup;
+
     [Header("風扇旋轉設定")]
     [SerializeField]
     private Vector3 fanRotationAxis = Vector3.forward;
@@ -80,7 +84,7 @@ public class AlphaEPowerController : MonoBehaviour
     [Header("MFC 發光設定")]
     [SerializeField]
     private Color mfcEmissionColor =
-    new Color(0.65f, 1.0f, 0.15f);
+    new Color(0.35f, 0.8f, 0.15f);
 
     [SerializeField]
     private float mfcEmissionIntensity = 1f;
@@ -92,6 +96,14 @@ public class AlphaEPowerController : MonoBehaviour
 
     [SerializeField]
     private float coolerEmissionIntensity = 1f;
+
+    [Header("High Voltage 發光設定")]
+    [SerializeField]
+    private Color highVoltageEmissionColor =
+    new Color(1.0f, 0.55f, 0.05f);
+
+    [SerializeField]
+    private float highVoltageEmissionIntensity = 1f;
 
     [Header("已完成步驟發光設定")]
     [SerializeField]
@@ -108,6 +120,7 @@ public class AlphaEPowerController : MonoBehaviour
     private bool isGasSupplyOn;
     private bool isMfcOn;
     private bool isCoolerOn;
+    private bool isHighVoltageOn;
 
     private string currentGasType = "";
     private float currentFanSpeed;
@@ -134,6 +147,12 @@ public class AlphaEPowerController : MonoBehaviour
     new List<Material>();
 
     private readonly List<Color> gasSupplyOriginalEmissionColors =
+        new List<Color>();
+
+    private readonly List<Material> highVoltageMaterials =
+    new List<Material>();
+
+    private readonly List<Color> highVoltageOriginalEmissionColors =
         new List<Color>();
 
     private static readonly int EmissionColorId =
@@ -169,6 +188,13 @@ public class AlphaEPowerController : MonoBehaviour
             "Gas Supply Group"
         );
 
+        CacheMaterials(
+            highVoltageGroup,
+            highVoltageMaterials,
+            highVoltageOriginalEmissionColors,
+            "High Voltage Group"
+        );
+
         ApplyEmission(
             powerMaterials,
             powerOriginalEmissionColors,
@@ -201,6 +227,14 @@ public class AlphaEPowerController : MonoBehaviour
             false,
             gasSupplyEmissionColor,
             gasSupplyEmissionIntensity
+        );
+
+        ApplyEmission(
+            highVoltageMaterials,
+            highVoltageOriginalEmissionColors,
+            false,
+            highVoltageEmissionColor,
+            highVoltageEmissionIntensity
         );
     }
 
@@ -291,12 +325,21 @@ public class AlphaEPowerController : MonoBehaviour
                 gasSupplyEmissionIntensity
             );
 
+            ApplyEmission(
+            highVoltageMaterials,
+            highVoltageOriginalEmissionColors,
+            false,
+            highVoltageEmissionColor,
+            highVoltageEmissionIntensity
+            );
+
             // 重設所有子系統狀態
             isRoughPumpOn = false;
             isTurboPumpOn = false;
             isGasSupplyOn = false;
             isMfcOn = false;
             isCoolerOn = false;
+            isHighVoltageOn = false;
 
             currentGasType = "";
 
@@ -702,14 +745,29 @@ public class AlphaEPowerController : MonoBehaviour
     }
 
     /*
-    * 控制 Cooler：
-    * Cooler On 時讓 Cooler_Group 發亮，
-    * 並讓 CoolingFan 慢慢加速旋轉。
-    */
+     * 控制 Cooler：
+     * Cooler On 時讓 Cooler_Group 發亮，
+     * 並讓 CoolingFan 慢慢加速旋轉。
+     *
+     * 流程順序：
+     * 必須先完成 MFC，完成後推進到 High Voltage。
+     */
     public void SetCooler(string command)
     {
         bool turnOn =
             command.Trim().ToLower() == "on";
+
+        // 只有開啟時才檢查目前流程步驟
+        if (
+            turnOn &&
+            flowManager != null &&
+            !flowManager.CanOperate(
+                AlphaEFlowManager.AlphaEStep.Cooler
+            )
+        )
+        {
+            return;
+        }
 
         if (turnOn && !isPowerOn)
         {
@@ -720,7 +778,29 @@ public class AlphaEPowerController : MonoBehaviour
             return;
         }
 
+        if (turnOn && !isMfcOn)
+        {
+            Debug.LogWarning(
+                "無法啟動 Cooler：請先啟動 MFC。"
+            );
+
+            return;
+        }
+
         isCoolerOn = turnOn;
+
+        if (!turnOn)
+        {
+            isHighVoltageOn = false;
+
+            ApplyEmission(
+                highVoltageMaterials,
+                highVoltageOriginalEmissionColors,
+                false,
+                highVoltageEmissionColor,
+                highVoltageEmissionIntensity
+            );
+        }
 
         ApplyEmission(
             coolerMaterials,
@@ -730,8 +810,131 @@ public class AlphaEPowerController : MonoBehaviour
             coolerEmissionIntensity
         );
 
+        if (
+            turnOn &&
+            flowManager != null
+        )
+        {
+            flowManager.CompleteStep(
+                AlphaEFlowManager.AlphaEStep.Cooler
+            );
+        }
+
         Debug.Log(
             $"Cooler：{(turnOn ? "On" : "Off")}"
+        );
+    }
+
+    /*
+     * 控制 High Voltage：
+     * 必須先完成 MFC 與 Cooler。
+     *
+     * High Voltage On：
+     * 1. Cooler_Group 改成淡暗藍色完成狀態。
+     * 2. IonSource_Group 使用紅橘色發亮。
+     * 3. 流程推進到 Microwave。
+     */
+    public void SetHighVoltage(string command)
+    {
+        bool turnOn =
+            command.Trim().ToLower() == "on";
+
+        if (
+            turnOn &&
+            flowManager != null &&
+            !flowManager.CanOperate(
+                AlphaEFlowManager.AlphaEStep.HighVoltage
+            )
+        )
+        {
+            return;
+        }
+
+        if (turnOn && !isPowerOn)
+        {
+            Debug.LogWarning(
+                "無法啟動 High Voltage：請先開啟 Power。"
+            );
+
+            return;
+        }
+
+        if (turnOn && !isMfcOn)
+        {
+            Debug.LogWarning(
+                "無法啟動 High Voltage：請先啟動 MFC。"
+            );
+
+            return;
+        }
+
+        if (turnOn && !isCoolerOn)
+        {
+            Debug.LogWarning(
+                "無法啟動 High Voltage：請先啟動 Cooler。"
+            );
+
+            return;
+        }
+
+        isHighVoltageOn = turnOn;
+
+        if (turnOn)
+        {
+            // Cooler 已完成，保留淡暗藍色
+            /*
+            ApplyEmission(
+                coolerMaterials,
+                coolerOriginalEmissionColors,
+                true,
+                completedEmissionColor,
+                completedEmissionIntensity
+            );
+            */
+
+            // High Voltage 為目前操作步驟
+            ApplyEmission(
+                highVoltageMaterials,
+                highVoltageOriginalEmissionColors,
+                true,
+                highVoltageEmissionColor,
+                highVoltageEmissionIntensity
+            );
+
+            if (flowManager != null)
+            {
+                flowManager.CompleteStep(
+                    AlphaEFlowManager.AlphaEStep.HighVoltage
+                );
+            }
+        }
+        else
+        {
+            ApplyEmission(
+                highVoltageMaterials,
+                highVoltageOriginalEmissionColors,
+                false,
+                highVoltageEmissionColor,
+                highVoltageEmissionIntensity
+            );
+
+            // Cooler 仍在運作，恢復成目前設備顏色
+            /*
+            if (isCoolerOn)
+            {
+                ApplyEmission(
+                    coolerMaterials,
+                    coolerOriginalEmissionColors,
+                    true,
+                    coolerEmissionColor,
+                    coolerEmissionIntensity
+                );
+            }
+            */
+        }
+
+        Debug.Log(
+            $"High Voltage：{(turnOn ? "On" : "Off")}"
         );
     }
 
@@ -920,10 +1123,23 @@ public class AlphaEPowerController : MonoBehaviour
     {
         SetCooler("off");
     }
+
+    [ContextMenu("Test High Voltage On")]
+    private void TestHighVoltageOn()
+    {
+        SetHighVoltage("on");
+    }
+
+    [ContextMenu("Test High Voltage Off")]
+    private void TestHighVoltageOff()
+    {
+        SetHighVoltage("off");
+    }
+
     /*
- * 模擬網頁使用 SendMessage 呼叫 SetPower，
- * 用來確認物件名稱與腳本掛載是否正確。
- */
+     * 模擬網頁使用 SendMessage 呼叫 SetPower，
+     * 用來確認物件名稱與腳本掛載是否正確。
+     */
     [ContextMenu("Test Web SendMessage")]
     private void TestWebSendMessage()
     {

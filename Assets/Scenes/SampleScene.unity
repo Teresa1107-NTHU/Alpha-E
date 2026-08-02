@@ -2296,6 +2296,7 @@ MonoBehaviour:
   coolerGroup: {fileID: 127886479}
   gasSupplyGroup: {fileID: 532808654}
   coolerFan: {fileID: 1066497965465956890}
+  highVoltageGroup: {fileID: 188581443}
   fanRotationAxis: {x: 0, y: 0, z: 1}
   targetFanSpeed: 500
   fanAcceleration: 45
@@ -2307,8 +2308,12 @@ MonoBehaviour:
   turboPumpEmissionIntensity: 1
   gasSupplyEmissionColor: {r: 1, g: 0.55, b: 0.1, a: 1}
   gasSupplyEmissionIntensity: 1
+  mfcEmissionColor: {r: 0.65, g: 1, b: 0.15, a: 1}
+  mfcEmissionIntensity: 1
   coolerEmissionColor: {r: 0.101960786, g: 0.8, b: 1, a: 1}
   coolerEmissionIntensity: 1
+  highVoltageEmissionColor: {r: 1, g: 0.25, b: 0.08, a: 1}
+  highVoltageEmissionIntensity: 1
   completedEmissionColor: {r: 0.101960786, g: 0.8, b: 1, a: 1}
   completedEmissionIntensity: 0.3
 --- !u!4 &2023312916
