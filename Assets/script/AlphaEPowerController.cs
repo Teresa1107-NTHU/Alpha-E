@@ -27,6 +27,10 @@ public class AlphaEPowerController : MonoBehaviour
     [SerializeField]
     private GameObject coolerGroup;
 
+    [Header("Gas Supply 對應區域")]
+    [SerializeField]
+    private GameObject gasSupplyGroup;
+
     [Header("Cooler 風扇葉片")]
     [SerializeField]
     private Transform coolerFan;
@@ -65,6 +69,14 @@ public class AlphaEPowerController : MonoBehaviour
     [SerializeField]
     private float turboPumpEmissionIntensity = 1f;
 
+    [Header("Gas Supply 發光設定")]
+    [SerializeField]
+    private Color gasSupplyEmissionColor =
+    new Color(1.0f, 0.55f, 0.10f);
+
+    [SerializeField]
+    private float gasSupplyEmissionIntensity = 1f;
+
     [Header("Cooler 發光設定")]
     [SerializeField]
     private Color coolerEmissionColor =
@@ -85,7 +97,10 @@ public class AlphaEPowerController : MonoBehaviour
     private bool isPowerOn;
     private bool isRoughPumpOn;
     private bool isTurboPumpOn;
+    private bool isGasSupplyOn;
     private bool isCoolerOn;
+
+    private string currentGasType = "";
     private float currentFanSpeed;
 
     private readonly List<Material> powerMaterials =
@@ -104,6 +119,12 @@ public class AlphaEPowerController : MonoBehaviour
     new List<Material>();
 
     private readonly List<Color> coolerOriginalEmissionColors =
+        new List<Color>();
+
+    private readonly List<Material> gasSupplyMaterials =
+    new List<Material>();
+
+    private readonly List<Color> gasSupplyOriginalEmissionColors =
         new List<Color>();
 
     private static readonly int EmissionColorId =
@@ -132,6 +153,13 @@ public class AlphaEPowerController : MonoBehaviour
             "Cooler_Group"
         );
 
+        CacheMaterials(
+            gasSupplyGroup,
+            gasSupplyMaterials,
+            gasSupplyOriginalEmissionColors,
+            "Gas Supply Group"
+        );
+
         ApplyEmission(
             powerMaterials,
             powerOriginalEmissionColors,
@@ -156,6 +184,14 @@ public class AlphaEPowerController : MonoBehaviour
             false,
             coolerEmissionColor,
             coolerEmissionIntensity
+        );
+
+        ApplyEmission(
+            gasSupplyMaterials,
+            gasSupplyOriginalEmissionColors,
+            false,
+            gasSupplyEmissionColor,
+            gasSupplyEmissionIntensity
         );
     }
 
@@ -238,10 +274,20 @@ public class AlphaEPowerController : MonoBehaviour
                 coolerEmissionIntensity
             );
 
+            ApplyEmission(
+                gasSupplyMaterials,
+                gasSupplyOriginalEmissionColors,
+                false,
+                gasSupplyEmissionColor,
+                gasSupplyEmissionIntensity
+            );
+
             // 重設所有子系統狀態
             isRoughPumpOn = false;
             isTurboPumpOn = false;
+            isGasSupplyOn = false;
             isCoolerOn = false;
+            currentGasType = "";
 
             if (flowManager != null)
             {
@@ -451,6 +497,101 @@ public class AlphaEPowerController : MonoBehaviour
     }
 
     /*
+    * Gas Supply 控制：
+    * 接收網頁傳來的氣體種類，例如 Deuterium、Hydrogen 或 Argon。
+    *
+    * 傳入 "off" 時關閉；
+    * 傳入氣體名稱時代表完成氣體設定並啟動 Gas Supply。
+    */
+    public void SetGasSupply(string command)
+    {
+        string value = command.Trim();
+
+        bool turnOn =
+            !string.IsNullOrEmpty(value) &&
+            value.ToLower() != "off";
+
+        if (
+            turnOn &&
+            flowManager != null &&
+            !flowManager.CanOperate(
+                AlphaEFlowManager.AlphaEStep.GasSupply
+            )
+        )
+        {
+            return;
+        }
+
+        if (turnOn && !isPowerOn)
+        {
+            Debug.LogWarning(
+                "無法設定 Gas Supply：請先開啟 Power。"
+            );
+
+            return;
+        }
+
+        if (turnOn && !isTurboPumpOn)
+        {
+            Debug.LogWarning(
+                "無法設定 Gas Supply：請先完成 Turbo Pump 高真空步驟。"
+            );
+
+            return;
+        }
+
+        isGasSupplyOn = turnOn;
+
+        if (turnOn)
+        {
+            currentGasType = value;
+
+            // 真空系統已完成，保留淡暗藍色
+            ApplyEmission(
+                vacuumMaterials,
+                vacuumOriginalEmissionColors,
+                true,
+                completedEmissionColor,
+                completedEmissionIntensity
+            );
+
+            // Gas Supply 是目前步驟，使用橘黃色高亮
+            ApplyEmission(
+                gasSupplyMaterials,
+                gasSupplyOriginalEmissionColors,
+                true,
+                gasSupplyEmissionColor,
+                gasSupplyEmissionIntensity
+            );
+
+            if (flowManager != null)
+            {
+                flowManager.CompleteStep(
+                    AlphaEFlowManager.AlphaEStep.GasSupply
+                );
+            }
+        }
+        else
+        {
+            currentGasType = "";
+
+            ApplyEmission(
+                gasSupplyMaterials,
+                gasSupplyOriginalEmissionColors,
+                false,
+                gasSupplyEmissionColor,
+                gasSupplyEmissionIntensity
+            );
+        }
+
+        Debug.Log(
+            turnOn
+                ? $"Gas Supply：On，氣體種類：{currentGasType}"
+                : "Gas Supply：Off"
+        );
+    }
+
+    /*
     * 控制 Cooler：
     * Cooler On 時讓 Cooler_Group 發亮，
     * 並讓 CoolingFan 慢慢加速旋轉。
@@ -632,6 +773,18 @@ public class AlphaEPowerController : MonoBehaviour
     private void TestTurboPumpOff()
     {
         SetTurboPump("off");
+    }
+
+    [ContextMenu("Test Gas Supply On")]
+    private void TestGasSupplyOn()
+    {
+        SetGasSupply("Deuterium");
+    }
+
+    [ContextMenu("Test Gas Supply Off")]
+    private void TestGasSupplyOff()
+    {
+        SetGasSupply("off");
     }
 
     [ContextMenu("Test Cooler On")]

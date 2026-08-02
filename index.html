@@ -109,84 +109,118 @@
 
       loadingBar.style.display = "block";
 
-      var script = document.createElement("script");
-      script.src = loaderUrl;
-      script.onload = () => {
-        createUnityInstance(canvas, config, (progress) => {
-          progressBarFull.style.width = 100 * progress + "%";
-              }).then((unityInstance) => {
-                loadingBar.style.display = "none";
-                fullscreenButton.onclick = () => {
-                  unityInstance.SetFullscreen(1);
-                };
+        var script = document.createElement("script");
+        script.src = loaderUrl;
 
-                  /*
-     * 接收外層 Alpha-E 操作面板傳來的控制指令。
-     */
-                  window.addEventListener("message", function (event) {
-                      const message = event.data;
+        script.onload = () => {
+            createUnityInstance(canvas, config, (progress) => {
+                progressBarFull.style.width = 100 * progress + "%";
+            })
+                .then((unityInstance) => {
+                    loadingBar.style.display = "none";
 
-                      if (
-                          !message ||
-                          message.source !== "alpha-e-parent"
-                      ) {
-                          return;
-                      }
+                    fullscreenButton.onclick = () => {
+                        unityInstance.SetFullscreen(1);
+                    };
 
-                      console.log("Unity WebGL 收到：", message);
+                    console.log("Unity WebGL Ready");
 
-                      /* Power On / Off */
-                      if (message.type === "SetPower") {
-                          unityInstance.SendMessage(
-                              "AlphaEWebController",
-                              "SetPower",
-                              message.action || message.value || "off"
-                          );
-                      }
+                    /*
+                     * 接收外層 Alpha-E 操作面板傳來的控制訊息。
+                     */
+                    window.addEventListener("message", function (event) {
+                        const message = event.data;
 
-                      /* Rough Pump */
-                      if (
-                          message.type === "OperateEquipment" &&
-                          message.equipmentId === "rough_pump"
-                      ) {
-                          unityInstance.SendMessage(
-                              "AlphaEWebController",
-                              "SetRoughPump",
-                              message.action || "off"
-                          );
-                      }
+                        if (
+                            !message ||
+                            message.source !== "alpha-e-parent"
+                        ) {
+                            return;
+                        }
 
-                      /* Turbo Pump */
-                      if (
-                          message.type === "OperateEquipment" &&
-                          message.equipmentId === "turbo_pump"
-                      ) {
-                          unityInstance.SendMessage(
-                              "AlphaEWebController",
-                              "SetTurboPump",
-                              message.action || "off"
-                          );
-                      }
+                        console.log("Unity 收到：", message);
 
-                      /* Cooler */
-                      if (
-                          message.type === "OperateEquipment" &&
-                          message.equipmentId === "cooler"
-                      ) {
-                          unityInstance.SendMessage(
-                              "AlphaEWebController",
-                              "SetCooler",
-                              message.action || "off"
-                          );
-                      }
-                  });
+                        switch (message.type) {
+                            /* =========================
+                               Power
+                            ========================= */
+                            case "SetPower":
+                                unityInstance.SendMessage(
+                                    "AlphaEWebController",
+                                    "SetPower",
+                                    message.action ||
+                                    message.value ||
+                                    "off"
+                                );
+                                break;
 
-              }).catch((message) => {
-                alert(message);
-              });
-            };
+                            /* =========================
+                               一般設備
+                            ========================= */
+                            case "OperateEquipment":
+                                switch (message.equipmentId) {
+                                    case "rough_pump":
+                                        unityInstance.SendMessage(
+                                            "AlphaEWebController",
+                                            "SetRoughPump",
+                                            message.action || "off"
+                                        );
+                                        break;
 
-      document.body.appendChild(script);
+                                    case "turbo_pump":
+                                        unityInstance.SendMessage(
+                                            "AlphaEWebController",
+                                            "SetTurboPump",
+                                            message.action || "off"
+                                        );
+                                        break;
+
+                                    case "cooler":
+                                        unityInstance.SendMessage(
+                                            "AlphaEWebController",
+                                            "SetCooler",
+                                            message.action || "off"
+                                        );
+                                        break;
+
+                                    default:
+                                        console.warn(
+                                            "尚未設定的設備：",
+                                            message.equipmentId
+                                        );
+                                        break;
+                                }
+
+                                break;
+
+                            /* =========================
+                               Gas Supply
+                            ========================= */
+                            case "SetupGas":
+                                unityInstance.SendMessage(
+                                    "AlphaEWebController",
+                                    "SetGasSupply",
+                                    message.action ||
+                                    message.value ||
+                                    "Deuterium"
+                                );
+                                break;
+
+                            default:
+                                console.warn(
+                                    "尚未處理的訊息類型：",
+                                    message.type
+                                );
+                                break;
+                        }
+                    });
+                })
+                .catch((message) => {
+                    alert(message);
+                });
+        };
+
+        document.body.appendChild(script);
 
     </script>
   </body>
