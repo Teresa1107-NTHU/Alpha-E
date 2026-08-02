@@ -183,6 +183,14 @@
                                         );
                                         break;
 
+                                    case "gas_mfc":
+                                        unityInstance.SendMessage(
+                                            "AlphaEWebController",
+                                            "SetMFC",
+                                            message.action || "off"
+                                        );
+                                        break;
+
                                     default:
                                         console.warn(
                                             "尚未設定的設備：",

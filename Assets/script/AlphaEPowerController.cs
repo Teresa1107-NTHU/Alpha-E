@@ -77,6 +77,14 @@ public class AlphaEPowerController : MonoBehaviour
     [SerializeField]
     private float gasSupplyEmissionIntensity = 1f;
 
+    [Header("MFC 發光設定")]
+    [SerializeField]
+    private Color mfcEmissionColor =
+    new Color(0.65f, 1.0f, 0.15f);
+
+    [SerializeField]
+    private float mfcEmissionIntensity = 1f;
+
     [Header("Cooler 發光設定")]
     [SerializeField]
     private Color coolerEmissionColor =
@@ -98,6 +106,7 @@ public class AlphaEPowerController : MonoBehaviour
     private bool isRoughPumpOn;
     private bool isTurboPumpOn;
     private bool isGasSupplyOn;
+    private bool isMfcOn;
     private bool isCoolerOn;
 
     private string currentGasType = "";
@@ -286,7 +295,9 @@ public class AlphaEPowerController : MonoBehaviour
             isRoughPumpOn = false;
             isTurboPumpOn = false;
             isGasSupplyOn = false;
+            isMfcOn = false;
             isCoolerOn = false;
+
             currentGasType = "";
 
             if (flowManager != null)
@@ -574,6 +585,7 @@ public class AlphaEPowerController : MonoBehaviour
         else
         {
             currentGasType = "";
+            isMfcOn = false;
 
             ApplyEmission(
                 gasSupplyMaterials,
@@ -588,6 +600,104 @@ public class AlphaEPowerController : MonoBehaviour
             turnOn
                 ? $"Gas Supply：On，氣體種類：{currentGasType}"
                 : "Gas Supply：Off"
+        );
+    }
+
+    /*
+     * 控制 MFC（質量流量控制器）。
+     *
+     * MFC On：
+     * 1. 必須先完成 Gas Supply。
+     * 2. Gas_MFC_Group 改成黃綠色高亮，
+     *    表示正在精確控制氣體流量。
+     * 3. 流程推進到 Cooler。
+     *
+     * MFC Off：
+     * 若 Gas Supply 仍維持設定，
+     * 回到 Gas Supply 的橘黃色狀態。
+     */
+    public void SetMFC(string command)
+    {
+        bool turnOn =
+            command.Trim().ToLower() == "on";
+
+        if (
+            turnOn &&
+            flowManager != null &&
+            !flowManager.CanOperate(
+                AlphaEFlowManager.AlphaEStep.MFC
+            )
+        )
+        {
+            return;
+        }
+
+        if (turnOn && !isPowerOn)
+        {
+            Debug.LogWarning(
+                "無法啟動 MFC：請先開啟 Power。"
+            );
+
+            return;
+        }
+
+        if (turnOn && !isGasSupplyOn)
+        {
+            Debug.LogWarning(
+                "無法啟動 MFC：請先完成 Gas Supply。"
+            );
+
+            return;
+        }
+
+        isMfcOn = turnOn;
+
+        if (turnOn)
+        {
+            // MFC 為目前操作步驟
+            ApplyEmission(
+                gasSupplyMaterials,
+                gasSupplyOriginalEmissionColors,
+                true,
+                mfcEmissionColor,
+                mfcEmissionIntensity
+            );
+
+            if (flowManager != null)
+            {
+                flowManager.CompleteStep(
+                    AlphaEFlowManager.AlphaEStep.MFC
+                );
+            }
+        }
+        else
+        {
+            if (isGasSupplyOn)
+            {
+                // MFC 關閉，但氣體仍已設定
+                ApplyEmission(
+                    gasSupplyMaterials,
+                    gasSupplyOriginalEmissionColors,
+                    true,
+                    gasSupplyEmissionColor,
+                    gasSupplyEmissionIntensity
+                );
+            }
+            else
+            {
+                // Gas Supply 也關閉，恢復原材質
+                ApplyEmission(
+                    gasSupplyMaterials,
+                    gasSupplyOriginalEmissionColors,
+                    false,
+                    mfcEmissionColor,
+                    mfcEmissionIntensity
+                );
+            }
+        }
+
+        Debug.Log(
+            $"MFC：{(turnOn ? "On" : "Off")}"
         );
     }
 
@@ -785,6 +895,18 @@ public class AlphaEPowerController : MonoBehaviour
     private void TestGasSupplyOff()
     {
         SetGasSupply("off");
+    }
+
+    [ContextMenu("Test MFC On")]
+    private void TestMFCOn()
+    {
+        SetMFC("on");
+    }
+
+    [ContextMenu("Test MFC Off")]
+    private void TestMFCOff()
+    {
+        SetMFC("off");
     }
 
     [ContextMenu("Test Cooler On")]
