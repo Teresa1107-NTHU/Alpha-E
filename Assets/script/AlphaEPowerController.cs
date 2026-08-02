@@ -920,4 +920,44 @@ public class AlphaEPowerController : MonoBehaviour
     {
         SetCooler("off");
     }
+    /*
+ * 家览呼ㄏノ SendMessage ㊣ SetPower
+ * ノㄓ絋粄ン嘿籔竲セ本更琌タ絋
+ */
+    [ContextMenu("Test Web SendMessage")]
+    private void TestWebSendMessage()
+    {
+        GameObject target =
+            GameObject.Find("AlphaEWebController");
+
+        if (target == null)
+        {
+            Debug.LogError(
+                "тぃ AlphaEWebController ン"
+            );
+            return;
+        }
+
+        AlphaEPowerController controller =
+            target.GetComponent<AlphaEPowerController>();
+
+        if (controller == null)
+        {
+            Debug.LogError(
+                "т AlphaEWebController" +
+                "⊿Τ AlphaEPowerController じン"
+            );
+            return;
+        }
+
+        target.SendMessage(
+            "SetPower",
+            "on",
+            SendMessageOptions.RequireReceiver
+        );
+
+        Debug.Log(
+            "SendMessage 代刚Θ"
+        );
+    }
 }
