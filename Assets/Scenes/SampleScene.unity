@@ -1720,8 +1720,8 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 963194225}
   serializedVersion: 2
-  m_LocalRotation: {x: 0.06452068, y: 0.7483559, z: -0.07330185, w: 0.6560697}
-  m_LocalPosition: {x: -3.02492, y: 1.2585012, z: -2.3186264}
+  m_LocalRotation: {x: 0.030417545, y: 0.76188534, z: -0.03555636, w: 0.6460196}
+  m_LocalPosition: {x: -3.0658128, y: 1.23142, z: -1.9566108}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -2297,6 +2297,7 @@ MonoBehaviour:
   gasSupplyGroup: {fileID: 532808654}
   coolerFan: {fileID: 1066497965465956890}
   highVoltageGroup: {fileID: 188581443}
+  microwaveGroup: {fileID: 737346544}
   fanRotationAxis: {x: 0, y: 0, z: 1}
   targetFanSpeed: 500
   fanAcceleration: 45
@@ -2314,6 +2315,8 @@ MonoBehaviour:
   coolerEmissionIntensity: 1
   highVoltageEmissionColor: {r: 1, g: 0.25, b: 0.08, a: 1}
   highVoltageEmissionIntensity: 1
+  microwaveEmissionColor: {r: 0.75, g: 0.2, b: 1, a: 1}
+  microwaveEmissionIntensity: 1
   completedEmissionColor: {r: 0.101960786, g: 0.8, b: 1, a: 1}
   completedEmissionIntensity: 0.3
 --- !u!4 &2023312916

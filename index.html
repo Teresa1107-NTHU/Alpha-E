@@ -191,6 +191,16 @@
                                         );
                                         break;
 
+                                    case "microwave":
+
+                                        unityInstance.SendMessage(
+                                            "AlphaEWebController",
+                                            "SetMicrowave",
+                                            message.action
+                                        );
+
+                                        break;
+
                                     default:
                                         console.warn(
                                             "尚未設定的設備：",

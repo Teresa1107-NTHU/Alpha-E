@@ -39,6 +39,10 @@ public class AlphaEPowerController : MonoBehaviour
     [SerializeField]
     private GameObject highVoltageGroup;
 
+    [Header("Microwave 對應區域")]
+    [SerializeField]
+    private GameObject microwaveGroup;
+
     [Header("風扇旋轉設定")]
     [SerializeField]
     private Vector3 fanRotationAxis = Vector3.forward;
@@ -105,13 +109,25 @@ public class AlphaEPowerController : MonoBehaviour
     [SerializeField]
     private float highVoltageEmissionIntensity = 1f;
 
+    [Header("Microwave 發光設定")]
+    [SerializeField]
+    private Color microwaveEmissionColor =
+    new Color(
+        0.75f,
+        0.2f,
+        1f
+    );
+
+    [SerializeField]
+    private float microwaveEmissionIntensity = 1f;
+
     [Header("已完成步驟發光設定")]
     [SerializeField]
     private Color completedEmissionColor =
-    new Color(0.2f, 1.0f, 0.2f);
+    new Color(0.05f, 0.18f, 0.40f);
 
     [SerializeField]
-    private float completedEmissionIntensity = 1f;
+    private float completedEmissionIntensity = 0.3f;
 
 
     private bool isPowerOn;
@@ -121,6 +137,7 @@ public class AlphaEPowerController : MonoBehaviour
     private bool isMfcOn;
     private bool isCoolerOn;
     private bool isHighVoltageOn;
+    private bool isMicrowaveOn;
 
     private string currentGasType = "";
     private float currentFanSpeed;
@@ -153,6 +170,12 @@ public class AlphaEPowerController : MonoBehaviour
     new List<Material>();
 
     private readonly List<Color> highVoltageOriginalEmissionColors =
+        new List<Color>();
+
+    private readonly List<Material> microwaveMaterials =
+    new List<Material>();
+
+    private readonly List<Color> microwaveOriginalEmissionColors =
         new List<Color>();
 
     private static readonly int EmissionColorId =
@@ -193,6 +216,13 @@ public class AlphaEPowerController : MonoBehaviour
             highVoltageMaterials,
             highVoltageOriginalEmissionColors,
             "High Voltage Group"
+        );
+
+        CacheMaterials(
+            microwaveGroup,
+            microwaveMaterials,
+            microwaveOriginalEmissionColors,
+            "Microwave Group"
         );
 
         ApplyEmission(
@@ -236,6 +266,16 @@ public class AlphaEPowerController : MonoBehaviour
             highVoltageEmissionColor,
             highVoltageEmissionIntensity
         );
+
+        ApplyEmission(
+            microwaveMaterials,
+            microwaveOriginalEmissionColors,
+            false,
+            microwaveEmissionColor,
+            microwaveEmissionIntensity
+        );
+
+        
     }
 
     private void Update()
@@ -333,6 +373,14 @@ public class AlphaEPowerController : MonoBehaviour
             highVoltageEmissionIntensity
             );
 
+            ApplyEmission(
+                microwaveMaterials,
+                microwaveOriginalEmissionColors,
+                false,
+                microwaveEmissionColor,
+                microwaveEmissionIntensity
+            );
+
             // 重設所有子系統狀態
             isRoughPumpOn = false;
             isTurboPumpOn = false;
@@ -340,6 +388,7 @@ public class AlphaEPowerController : MonoBehaviour
             isMfcOn = false;
             isCoolerOn = false;
             isHighVoltageOn = false;
+            isMicrowaveOn = false;
 
             currentGasType = "";
 
@@ -789,9 +838,44 @@ public class AlphaEPowerController : MonoBehaviour
 
         isCoolerOn = turnOn;
 
-        if (!turnOn)
+        if (turnOn)
+        {
+            // MFC 已完成，但仍持續控制流量
+            ApplyEmission(
+                gasSupplyMaterials,
+                gasSupplyOriginalEmissionColors,
+                true,
+                completedEmissionColor,
+                completedEmissionIntensity
+            );
+
+            // Cooler 是目前操作步驟
+            ApplyEmission(
+                coolerMaterials,
+                coolerOriginalEmissionColors,
+                true,
+                coolerEmissionColor,
+                coolerEmissionIntensity
+            );
+
+            if (flowManager != null)
+            {
+                flowManager.CompleteStep(
+                    AlphaEFlowManager.AlphaEStep.Cooler
+                );
+            }
+        }
+        else
         {
             isHighVoltageOn = false;
+
+            ApplyEmission(
+                coolerMaterials,
+                coolerOriginalEmissionColors,
+                false,
+                coolerEmissionColor,
+                coolerEmissionIntensity
+            );
 
             ApplyEmission(
                 highVoltageMaterials,
@@ -799,24 +883,6 @@ public class AlphaEPowerController : MonoBehaviour
                 false,
                 highVoltageEmissionColor,
                 highVoltageEmissionIntensity
-            );
-        }
-
-        ApplyEmission(
-            coolerMaterials,
-            coolerOriginalEmissionColors,
-            turnOn,
-            coolerEmissionColor,
-            coolerEmissionIntensity
-        );
-
-        if (
-            turnOn &&
-            flowManager != null
-        )
-        {
-            flowManager.CompleteStep(
-                AlphaEFlowManager.AlphaEStep.Cooler
             );
         }
 
@@ -882,7 +948,7 @@ public class AlphaEPowerController : MonoBehaviour
         if (turnOn)
         {
             // Cooler 已完成，保留淡暗藍色
-            /*
+            
             ApplyEmission(
                 coolerMaterials,
                 coolerOriginalEmissionColors,
@@ -890,7 +956,7 @@ public class AlphaEPowerController : MonoBehaviour
                 completedEmissionColor,
                 completedEmissionIntensity
             );
-            */
+            
 
             // High Voltage 為目前操作步驟
             ApplyEmission(
@@ -919,7 +985,7 @@ public class AlphaEPowerController : MonoBehaviour
             );
 
             // Cooler 仍在運作，恢復成目前設備顏色
-            /*
+            
             if (isCoolerOn)
             {
                 ApplyEmission(
@@ -930,11 +996,121 @@ public class AlphaEPowerController : MonoBehaviour
                     coolerEmissionIntensity
                 );
             }
-            */
+            
         }
 
         Debug.Log(
             $"High Voltage：{(turnOn ? "On" : "Off")}"
+        );
+    }
+
+    /*
+     * 控制 Microwave：
+     *
+     * 必須完成 High Voltage。
+     *
+     * Microwave On：
+     * 1. High Voltage 變完成狀態。
+     * 2. Microwave_RF_Group 紫色發亮。
+     * 3. 推進流程到 Beam。
+     */
+    public void SetMicrowave(string command)
+    {
+        bool turnOn =
+            command.Trim().ToLower() == "on";
+
+        if (
+            turnOn &&
+            flowManager != null &&
+            !flowManager.CanOperate(
+                AlphaEFlowManager.AlphaEStep.Microwave
+            )
+        )
+        {
+            return;
+        }
+
+        if (turnOn && !isPowerOn)
+        {
+            Debug.LogWarning(
+                "請先開啟 Power。"
+            );
+
+            return;
+        }
+
+        if (turnOn && !isHighVoltageOn)
+        {
+            Debug.LogWarning(
+                "請先完成 High Voltage。"
+            );
+
+            return;
+        }
+
+        isMicrowaveOn = turnOn;
+
+        if (turnOn)
+        {
+            //-------------------------------------------------
+            // High Voltage 已完成
+            //-------------------------------------------------
+
+            ApplyEmission(
+                highVoltageMaterials,
+                highVoltageOriginalEmissionColors,
+                true,
+                completedEmissionColor,
+                completedEmissionIntensity
+            );
+
+            //-------------------------------------------------
+            // Microwave 為目前步驟
+            //-------------------------------------------------
+
+            ApplyEmission(
+                microwaveMaterials,
+                microwaveOriginalEmissionColors,
+                true,
+                microwaveEmissionColor,
+                microwaveEmissionIntensity
+            );
+
+            //-------------------------------------------------
+            // 下一步 Beam
+            //-------------------------------------------------
+
+            if (flowManager != null)
+            {
+                flowManager.CompleteStep(
+                    AlphaEFlowManager.AlphaEStep.Microwave
+                );
+            }
+        }
+        else
+        {
+            ApplyEmission(
+                microwaveMaterials,
+                microwaveOriginalEmissionColors,
+                false,
+                microwaveEmissionColor,
+                microwaveEmissionIntensity
+            );
+
+            if (isHighVoltageOn)
+            {
+                ApplyEmission(
+                    highVoltageMaterials,
+                    highVoltageOriginalEmissionColors,
+                    true,
+                    highVoltageEmissionColor,
+                    highVoltageEmissionIntensity
+                );
+            }
+        }
+
+        Debug.Log(
+            $"Microwave：{(turnOn ? "On" : "Off")}"
         );
     }
 
@@ -1134,6 +1310,18 @@ public class AlphaEPowerController : MonoBehaviour
     private void TestHighVoltageOff()
     {
         SetHighVoltage("off");
+    }
+
+    [ContextMenu("Test Microwave On")]
+    private void TestMicrowaveOn()
+    {
+        SetMicrowave("on");
+    }
+
+    [ContextMenu("Test Microwave Off")]
+    private void TestMicrowaveOff()
+    {
+        SetMicrowave("off");
     }
 
     /*
