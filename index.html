@@ -158,7 +158,9 @@
                                一般設備
                             ========================= */
                             case "OperateEquipment":
+
                                 switch (message.equipmentId) {
+
                                     case "rough_pump":
                                         unityInstance.SendMessage(
                                             "AlphaEWebController",
@@ -175,14 +177,6 @@
                                         );
                                         break;
 
-                                    case "cooler":
-                                        unityInstance.SendMessage(
-                                            "AlphaEWebController",
-                                            "SetCooler",
-                                            message.action || "off"
-                                        );
-                                        break;
-
                                     case "gas_mfc":
                                         unityInstance.SendMessage(
                                             "AlphaEWebController",
@@ -191,14 +185,28 @@
                                         );
                                         break;
 
-                                    case "microwave":
+                                    case "cooler":
+                                        unityInstance.SendMessage(
+                                            "AlphaEWebController",
+                                            "SetCooler",
+                                            message.action || "off"
+                                        );
+                                        break;
 
+                                    case "high_voltage":
+                                        unityInstance.SendMessage(
+                                            "AlphaEWebController",
+                                            "SetHighVoltage",
+                                            message.action || "off"
+                                        );
+                                        break;
+
+                                    case "microwave":
                                         unityInstance.SendMessage(
                                             "AlphaEWebController",
                                             "SetMicrowave",
-                                            message.action
+                                            message.action || "off"
                                         );
-
                                         break;
 
                                     default:
