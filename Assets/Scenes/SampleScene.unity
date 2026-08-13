@@ -2303,7 +2303,7 @@ MonoBehaviour:
   fanAcceleration: 45
   powerEmissionColor: {r: 0.101960786, g: 0.8, b: 1, a: 1}
   powerEmissionIntensity: 1
-  roughPumpEmissionColor: {r: 0.101960786, g: 0.8, b: 1, a: 1}
+  roughPumpEmissionColor: {r: 0.9245283, g: 0.83949625, b: 0.09158063, a: 1}
   roughPumpEmissionIntensity: 1
   turboPumpEmissionColor: {r: 0.25, g: 0.25, b: 0.85, a: 1}
   turboPumpEmissionIntensity: 1
@@ -2313,9 +2313,9 @@ MonoBehaviour:
   mfcEmissionIntensity: 1
   coolerEmissionColor: {r: 0.101960786, g: 0.8, b: 1, a: 1}
   coolerEmissionIntensity: 1
-  highVoltageEmissionColor: {r: 1, g: 0.25, b: 0.08, a: 1}
+  highVoltageEmissionColor: {r: 0.8481983, g: 0.07843137, b: 1, a: 1}
   highVoltageEmissionIntensity: 1
-  microwaveEmissionColor: {r: 0.75, g: 0.2, b: 1, a: 1}
+  microwaveEmissionColor: {r: 0.9150943, g: 0.43320495, b: 0.40143287, a: 1}
   microwaveEmissionIntensity: 1
   completedEmissionColor: {r: 0.101960786, g: 0.8, b: 1, a: 1}
   completedEmissionIntensity: 0.3

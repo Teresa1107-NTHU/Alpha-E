@@ -1007,12 +1007,12 @@ public class AlphaEPowerController : MonoBehaviour
     /*
      * 控制 Microwave：
      *
-     * 必須完成 High Voltage。
+     * 必須先完成 High Voltage。
      *
      * Microwave On：
-     * 1. High Voltage 變完成狀態。
+     * 1. High Voltage 維持原本發光，表示仍持續運作。
      * 2. Microwave_RF_Group 紫色發亮。
-     * 3. 推進流程到 Beam。
+     * 3. 流程推進到 Beam。
      */
     public void SetMicrowave(string command)
     {
@@ -1052,21 +1052,7 @@ public class AlphaEPowerController : MonoBehaviour
 
         if (turnOn)
         {
-            //-------------------------------------------------
-            // High Voltage 已完成
-            //-------------------------------------------------
-
-            ApplyEmission(
-                highVoltageMaterials,
-                highVoltageOriginalEmissionColors,
-                true,
-                completedEmissionColor,
-                completedEmissionIntensity
-            );
-
-            //-------------------------------------------------
-            // Microwave 為目前步驟
-            //-------------------------------------------------
+            // High Voltage 保持原本亮色，不修改
 
             ApplyEmission(
                 microwaveMaterials,
@@ -1075,10 +1061,6 @@ public class AlphaEPowerController : MonoBehaviour
                 microwaveEmissionColor,
                 microwaveEmissionIntensity
             );
-
-            //-------------------------------------------------
-            // 下一步 Beam
-            //-------------------------------------------------
 
             if (flowManager != null)
             {
@@ -1097,6 +1079,7 @@ public class AlphaEPowerController : MonoBehaviour
                 microwaveEmissionIntensity
             );
 
+            // High Voltage 仍然是 On，所以繼續亮
             if (isHighVoltageOn)
             {
                 ApplyEmission(
