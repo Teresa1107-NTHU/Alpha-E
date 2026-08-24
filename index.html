@@ -1,12 +1,74 @@
 <!DOCTYPE html>
 <html lang="en-us">
-  <head>
+<head>
     <meta charset="utf-8">
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
     <title>Unity WebGL Player | Alpha-E</title>
     <link rel="shortcut icon" href="TemplateData/favicon.ico">
     <link rel="stylesheet" href="TemplateData/style.css">
-  </head>
+    <style>
+
+        html,
+        body {
+            width: 100%;
+            height: 100%;
+            margin: 0;
+            padding: 0;
+            overflow: hidden;
+        }
+
+
+        #unity-container,
+        #unity-container.unity-desktop {
+            position: fixed !important;
+            inset: 0 !important;
+            width: 100% !important;
+            height: 100% !important;
+            transform: none !important;
+        }
+
+
+        #unity-canvas {
+            display: block;
+            width: 100% !important;
+            height: 100% !important;
+        }
+
+
+        #unity-footer {
+            display: none !important;
+        }
+
+        #unity-container,
+        #unity-container.unity-desktop {
+            position: fixed !important;
+            inset: 0 !important;
+            width: 100vw !important;
+            height: 100vh !important;
+            left: 0 !important;
+            top: 0 !important;
+            transform: none !important;
+            overflow: hidden !important;
+        }
+
+        #unity-canvas {
+            display: block !important;
+            width: 100vw !important;
+            height: 100vh !important;
+            max-width: 100% !important;
+            max-height: 100% !important;
+        }
+
+        #unity-footer {
+            display: none !important;
+        }
+
+        html,
+        body {
+            overflow: hidden !important;
+        }
+    </style>
+</head>
   <body>
     <div id="unity-container" class="unity-desktop">
       <canvas id="unity-canvas" width=960 height=600 tabindex="-1"></canvas>
@@ -101,10 +163,14 @@
 
 
       } else {
-        // Desktop style: Render the game canvas in a window that can be maximized to fullscreen:
 
-        canvas.style.width = "960px";
-        canvas.style.height = "600px";
+          /*
+           * 讓 WebGL Canvas 自動配合 iframe 尺寸，
+           * 不再固定為 960 × 600。
+           */
+          canvas.style.width = "100%";
+          canvas.style.height = "100%";
+
       }
 
       loadingBar.style.display = "block";
