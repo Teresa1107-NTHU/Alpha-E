@@ -31,7 +31,12 @@
         #unity-canvas {
             display: block;
             width: 100% !important;
-            height: 100% !important;
+            height: auto !important;
+            aspect-ratio: 960 / 600;
+            max-width: 100% !important;
+            max-height: 100% !important;
+            margin: auto;
+            background: #000;
         }
 
 
@@ -43,12 +48,14 @@
         #unity-container.unity-desktop {
             position: fixed !important;
             inset: 0 !important;
-            width: 100vw !important;
-            height: 100vh !important;
-            left: 0 !important;
-            top: 0 !important;
-            transform: none !important;
+            width: 100% !important;
+            height: 100% !important;
+            display: flex !important;
+            align-items: center !important;
+            justify-content: center !important;
             overflow: hidden !important;
+            background: #000;
+            transform: none !important;
         }
 
         #unity-canvas {
@@ -169,7 +176,7 @@
            * 不再固定為 960 × 600。
            */
           canvas.style.width = "100%";
-          canvas.style.height = "100%";
+          canvas.style.height = "auto";
 
       }
 
