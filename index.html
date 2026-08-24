@@ -24,18 +24,22 @@
             inset: 0 !important;
             width: 100% !important;
             height: 100% !important;
+            display: flex !important;
+            align-items: center !important;
+            justify-content: center !important;
+            overflow: hidden !important;
+            background: #000;
             transform: none !important;
         }
 
 
         #unity-canvas {
-            display: block;
+            display: block !important;
             width: 100% !important;
             height: auto !important;
             aspect-ratio: 960 / 600;
             max-width: 100% !important;
             max-height: 100% !important;
-            margin: auto;
             background: #000;
         }
 
@@ -170,11 +174,6 @@
 
 
       } else {
-
-          /*
-           * 讓 WebGL Canvas 自動配合 iframe 尺寸，
-           * 不再固定為 960 × 600。
-           */
           canvas.style.width = "100%";
           canvas.style.height = "auto";
 
