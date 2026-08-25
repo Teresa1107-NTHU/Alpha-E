@@ -16,13 +16,19 @@ body {
 
 /* Desktop / Mobile 都直接填滿 iframe */
 #unity-container,
+#unity-container.unity-desktop,
 #unity-container.unity-mobile {
     position: fixed;
     inset: 0;
     width: 100%;
     height: 100%;
     margin: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden;
     transform: none;
+    background: #000;
 }
 
 
@@ -30,10 +36,16 @@ body {
 #unity-canvas,
 .unity-mobile #unity-canvas {
     display: block;
+    /*
+     * 維持 Unity 原始 960 × 600 比例
+     */
     width: 100%;
-    height: 100%;
-    margin: 0;
-    background: #231F20;
+    height: auto;
+    aspect-ratio: 8 / 5;
+    max-width: 100%;
+    max-height: 100%;
+    margin: auto;
+    background: #000;
 }
 
 
