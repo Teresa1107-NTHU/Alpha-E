@@ -129,18 +129,27 @@
         updateBannerVisibility();
       }
 
-      var buildUrl = "Build";
-      var loaderUrl = buildUrl + "/AlphaE-WebGL.loader.js";
-      var config = {
-        dataUrl: buildUrl + "/AlphaE-WebGL.data",
-        frameworkUrl: buildUrl + "/AlphaE-WebGL.framework.js",
-        codeUrl: buildUrl + "/AlphaE-WebGL.wasm",
-        streamingAssetsUrl: "StreamingAssets",
-        companyName: "DefaultCompany",
-        productName: "Alpha-E",
-        productVersion: "0.1",
-        showBanner: unityShowBanner,
-      };
+        var buildUrl = "Build";
+
+        var loaderUrl =
+            buildUrl + "/AlphaE-WebGL-New.loader.js";
+
+        var config = {
+            dataUrl:
+                buildUrl + "/AlphaE-WebGL-New.data",
+
+            frameworkUrl:
+                buildUrl + "/AlphaE-WebGL-New.framework.js",
+
+            codeUrl:
+                buildUrl + "/AlphaE-WebGL-New.wasm",
+
+            streamingAssetsUrl: "StreamingAssets",
+            companyName: "DefaultCompany",
+            productName: "Alpha-E",
+            productVersion: "0.1",
+            showBanner: unityShowBanner,
+        };
 
       // By default, Unity keeps WebGL canvas render target size matched with
       // the DOM size of the canvas element (scaled by window.devicePixelRatio)
