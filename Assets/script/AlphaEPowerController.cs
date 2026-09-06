@@ -7,6 +7,9 @@
 
 using System.Collections.Generic;
 using UnityEngine;
+#if UNITY_EDITOR
+using UnityEditor;
+#endif
 
 public class AlphaEPowerController : MonoBehaviour
 {
@@ -189,6 +192,26 @@ public class AlphaEPowerController : MonoBehaviour
             powerOriginalEmissionColors,
             "Power_Control_Group"
         );
+
+        Debug.Log(
+    "[DEBUG] Vacuum Group = " +
+    (vacuumChamberGroup != null
+        ? vacuumChamberGroup.name
+        : "NULL")
+);
+
+        if (vacuumChamberGroup != null)
+        {
+            Renderer[] vacuumRenderers =
+                vacuumChamberGroup.GetComponentsInChildren<Renderer>(true);
+
+            Debug.Log(
+                "[DEBUG] Vacuum Renderers = " +
+                vacuumRenderers.Length +
+                " | Emission Materials = " +
+                vacuumMaterials.Count
+            );
+        }
 
         CacheMaterials(
             vacuumChamberGroup,
@@ -418,6 +441,12 @@ public class AlphaEPowerController : MonoBehaviour
     {
         bool turnOn =
             command.Trim().ToLower() == "on";
+
+        Debug.Log(
+    "[ROUGH PUMP] command = " + command +
+    " | turnOn = " + turnOn +
+    " | Vacuum Materials = " + vacuumMaterials.Count
+);
 
         if (
             turnOn &&
@@ -1188,6 +1217,13 @@ public class AlphaEPowerController : MonoBehaviour
         float intensity
     )
     {
+        Debug.Log(
+    "[EMISSION] enabled = " + enabled +
+    " | materials = " + materials.Count +
+    " | color = " + emissionColor +
+    " | intensity = " + intensity
+);
+
         for (int i = 0; i < materials.Count; i++)
         {
             Material material = materials[i];
@@ -1347,4 +1383,127 @@ public class AlphaEPowerController : MonoBehaviour
             "SendMessage 測試成功。"
         );
     }
+
+#if UNITY_EDITOR
+
+    /*
+     * WebGL Build 前使用：
+     * 將所有 Alpha-E 控制群組的 Material
+     * 預先啟用 _EMISSION Shader Keyword。
+     *
+     * 初始 Emission Color 設為黑色，
+     * 所以模型一開始不會發亮，
+     * 但 WebGL Build 會保留 Emission Shader Variant。
+     */
+    [ContextMenu("Prepare Emission Materials For WebGL")]
+    private void PrepareEmissionMaterialsForWebGL()
+    {
+        PrepareGroupEmission(
+            powerControlGroup,
+            "Power Control"
+        );
+
+        PrepareGroupEmission(
+            vacuumChamberGroup,
+            "Vacuum Chamber"
+        );
+
+        PrepareGroupEmission(
+            coolerGroup,
+            "Cooler"
+        );
+
+        PrepareGroupEmission(
+            gasSupplyGroup,
+            "Gas Supply"
+        );
+
+        PrepareGroupEmission(
+            highVoltageGroup,
+            "High Voltage"
+        );
+
+        PrepareGroupEmission(
+            microwaveGroup,
+            "Microwave"
+        );
+
+        AssetDatabase.SaveAssets();
+
+        Debug.Log(
+            "Alpha-E 所有可發光 Material 已準備完成，" +
+            "可以重新 Build WebGL。"
+        );
+    }
+
+
+    private void PrepareGroupEmission(
+        GameObject group,
+        string groupName
+    )
+    {
+        if (group == null)
+        {
+            Debug.LogWarning(
+                groupName + " 尚未指定。"
+            );
+
+            return;
+        }
+
+        Renderer[] renderers =
+            group.GetComponentsInChildren<Renderer>(true);
+
+        int count = 0;
+
+        foreach (Renderer renderer in renderers)
+        {
+            /*
+             * 注意這裡使用 sharedMaterials，
+             * 修改真正的 Material Asset，
+             * 而不是 Runtime Instance。
+             */
+            Material[] materials =
+                renderer.sharedMaterials;
+
+            foreach (Material material in materials)
+            {
+                if (material == null)
+                {
+                    continue;
+                }
+
+                if (!material.HasProperty("_EmissionColor"))
+                {
+                    continue;
+                }
+
+                material.EnableKeyword("_EMISSION");
+
+                /*
+                 * 初始維持不發光。
+                 * Runtime 時你的 ApplyEmission()
+                 * 再把它改成真正的顏色。
+                 */
+                material.SetColor(
+                    "_EmissionColor",
+                    Color.black
+                );
+
+                EditorUtility.SetDirty(material);
+
+                count++;
+            }
+        }
+
+        Debug.Log(
+            "[WEBGL EMISSION] " +
+            groupName +
+            "：已準備 " +
+            count +
+            " 個 Material。"
+        );
+    }
+
+#endif
 }
