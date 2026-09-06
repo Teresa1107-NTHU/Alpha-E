@@ -1480,16 +1480,6 @@ public class AlphaEPowerController : MonoBehaviour
 
                 material.EnableKeyword("_EMISSION");
 
-                /*
-                 * 初始維持不發光。
-                 * Runtime 時你的 ApplyEmission()
-                 * 再把它改成真正的顏色。
-                 */
-                material.SetColor(
-                    "_EmissionColor",
-                    Color.black
-                );
-
                 EditorUtility.SetDirty(material);
 
                 count++;
