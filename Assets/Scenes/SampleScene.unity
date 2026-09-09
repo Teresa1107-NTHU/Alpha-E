@@ -2210,24 +2210,22 @@ MonoBehaviour:
   fanRotationAxis: {x: 0, y: 0, z: 1}
   targetFanSpeed: 500
   fanAcceleration: 45
-  powerEmissionColor: {r: 0.101960786, g: 0.8, b: 1, a: 1}
-  powerEmissionIntensity: 1
+  powerEmissionColor: {r: 1, g: 0.217984, b: 0.10196078, a: 1}
+  powerEmissionIntensity: 0.5
   roughPumpEmissionColor: {r: 0.9245283, g: 0.83949625, b: 0.09158063, a: 1}
-  roughPumpEmissionIntensity: 1
-  turboPumpEmissionColor: {r: 0.25, g: 0.25, b: 0.85, a: 1}
-  turboPumpEmissionIntensity: 1
+  roughPumpEmissionIntensity: 0.5
+  turboPumpEmissionColor: {r: 0.2509804, g: 0.8509804, b: 0.39008906, a: 1}
+  turboPumpEmissionIntensity: 0.5
   gasSupplyEmissionColor: {r: 1, g: 0.55, b: 0.1, a: 1}
-  gasSupplyEmissionIntensity: 1
-  mfcEmissionColor: {r: 0.65, g: 1, b: 0.15, a: 1}
-  mfcEmissionIntensity: 1
+  gasSupplyEmissionIntensity: 0.7
+  mfcEmissionColor: {r: 0.6312142, g: 0.1490196, b: 1, a: 1}
+  mfcEmissionIntensity: 0.5
   coolerEmissionColor: {r: 0.101960786, g: 0.8, b: 1, a: 1}
-  coolerEmissionIntensity: 1
-  highVoltageEmissionColor: {r: 0.8481983, g: 0.07843137, b: 1, a: 1}
-  highVoltageEmissionIntensity: 1
-  microwaveEmissionColor: {r: 0.9150943, g: 0.43320495, b: 0.40143287, a: 1}
-  microwaveEmissionIntensity: 1
-  completedEmissionColor: {r: 0.101960786, g: 0.8, b: 1, a: 1}
-  completedEmissionIntensity: 0.3
+  coolerEmissionIntensity: 0.5
+  highVoltageEmissionColor: {r: 1, g: 0.07843137, b: 0.8072519, a: 1}
+  highVoltageEmissionIntensity: 0.5
+  microwaveEmissionColor: {r: 0.32039872, g: 0.9056604, b: 0.60704553, a: 1}
+  microwaveEmissionIntensity: 0.7
 --- !u!4 &2023312916
 Transform:
   m_ObjectHideFlags: 0

@@ -3,7 +3,15 @@ guid: d2c31eb5ac3af4940a08124722efe90b
 MonoImporter:
   externalObjects: {}
   serializedVersion: 2
-  defaultReferences: []
+  defaultReferences:
+  - flowManager: {instanceID: 0}
+  - powerControlGroup: {instanceID: 0}
+  - vacuumChamberGroup: {instanceID: 0}
+  - coolerGroup: {instanceID: 0}
+  - gasSupplyGroup: {instanceID: 0}
+  - coolerFan: {instanceID: 0}
+  - highVoltageGroup: {instanceID: 0}
+  - microwaveGroup: {instanceID: 0}
   executionOrder: 0
   icon: {instanceID: 0}
   userData: 

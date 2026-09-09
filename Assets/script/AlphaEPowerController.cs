@@ -7,9 +7,6 @@
 
 using System.Collections.Generic;
 using UnityEngine;
-#if UNITY_EDITOR
-using UnityEditor;
-#endif
 
 public class AlphaEPowerController : MonoBehaviour
 {
@@ -56,82 +53,76 @@ public class AlphaEPowerController : MonoBehaviour
     [SerializeField]
     private float fanAcceleration = 45f;
 
-    [Header("Power 發光設定")]
+    [Header("Power 顏色設定")]
     [SerializeField]
     private Color powerEmissionColor =
-        new Color(0.1f, 0.8f, 1f);
+    new Color(0.45f, 0.62f, 0.68f);
 
     [SerializeField]
-    private float powerEmissionIntensity = 1f;
+    private float powerEmissionIntensity = 0.45f;
 
-    [Header("Rough Pump 發光設定")]
+
+    [Header("Rough Pump 顏色設定")]
     [SerializeField]
     private Color roughPumpEmissionColor =
-        new Color(0.15f, 0.65f, 1f);
+    new Color(0.48f, 0.62f, 0.68f);
 
     [SerializeField]
-    private float roughPumpEmissionIntensity = 1f;
+    private float roughPumpEmissionIntensity = 0.45f;
 
-    [Header("Turbo Pump 發光設定")]
+
+    [Header("Turbo Pump 顏色設定")]
     [SerializeField]
     private Color turboPumpEmissionColor =
-    new Color(0.25f, 0.25f, 0.85f);
+    new Color(0.48f, 0.50f, 0.65f);
 
     [SerializeField]
-    private float turboPumpEmissionIntensity = 1f;
+    private float turboPumpEmissionIntensity = 0.45f;
 
-    [Header("Gas Supply 發光設定")]
+
+    [Header("Gas Supply 顏色設定")]
     [SerializeField]
     private Color gasSupplyEmissionColor =
-    new Color(1.0f, 0.55f, 0.10f);
+    new Color(0.68f, 0.57f, 0.43f);
 
     [SerializeField]
-    private float gasSupplyEmissionIntensity = 1f;
+    private float gasSupplyEmissionIntensity = 0.45f;
 
-    [Header("MFC 發光設定")]
+
+    [Header("MFC 顏色設定")]
     [SerializeField]
     private Color mfcEmissionColor =
-    new Color(0.35f, 0.8f, 0.15f);
+    new Color(0.52f, 0.64f, 0.46f);
 
     [SerializeField]
-    private float mfcEmissionIntensity = 1f;
+    private float mfcEmissionIntensity = 0.45f;
 
-    [Header("Cooler 發光設定")]
+
+    [Header("Cooler 顏色設定")]
     [SerializeField]
     private Color coolerEmissionColor =
-    new Color(0.2f, 0.9f, 1f);
+    new Color(0.45f, 0.64f, 0.68f);
 
     [SerializeField]
-    private float coolerEmissionIntensity = 1f;
+    private float coolerEmissionIntensity = 0.45f;
 
-    [Header("High Voltage 發光設定")]
+
+    [Header("High Voltage 顏色設定")]
     [SerializeField]
     private Color highVoltageEmissionColor =
-    new Color(1.0f, 0.55f, 0.05f);
+    new Color(0.68f, 0.48f, 0.43f);
 
     [SerializeField]
-    private float highVoltageEmissionIntensity = 1f;
+    private float highVoltageEmissionIntensity = 0.45f;
 
-    [Header("Microwave 發光設定")]
+
+    [Header("Microwave 顏色設定")]
     [SerializeField]
     private Color microwaveEmissionColor =
-    new Color(
-        0.75f,
-        0.2f,
-        1f
-    );
+    new Color(0.60f, 0.48f, 0.64f);
 
     [SerializeField]
-    private float microwaveEmissionIntensity = 1f;
-
-    [Header("已完成步驟發光設定")]
-    [SerializeField]
-    private Color completedEmissionColor =
-    new Color(0.05f, 0.18f, 0.40f);
-
-    [SerializeField]
-    private float completedEmissionIntensity = 0.3f;
-
+    private float microwaveEmissionIntensity = 0.45f;
 
     private bool isPowerOn;
     private bool isRoughPumpOn;
@@ -472,13 +463,13 @@ public class AlphaEPowerController : MonoBehaviour
 
         if (turnOn)
         {
-            // Power 已完成，但仍保持啟動
+            // Power 步驟已完成，恢復原本顏色
             ApplyEmission(
                 powerMaterials,
                 powerOriginalEmissionColors,
-                true,
-                completedEmissionColor,
-                completedEmissionIntensity
+                false,
+                powerEmissionColor,
+                powerEmissionIntensity
             );
 
             // Rough Pump 是目前操作步驟
@@ -598,29 +589,13 @@ public class AlphaEPowerController : MonoBehaviour
         }
         else
         {
-            if (isRoughPumpOn)
-            {
-                // Rough Pump 仍在運作，
-                // 真空系統改成淡暗藍色完成狀態
-                ApplyEmission(
-                    vacuumMaterials,
-                    vacuumOriginalEmissionColors,
-                    true,
-                    completedEmissionColor,
-                    completedEmissionIntensity
-                );
-            }
-            else
-            {
-                // Rough Pump 也已關閉，恢復原材質
-                ApplyEmission(
-                    vacuumMaterials,
-                    vacuumOriginalEmissionColors,
-                    false,
-                    turboPumpEmissionColor,
-                    turboPumpEmissionIntensity
-                );
-            }
+            ApplyEmission(
+                vacuumMaterials,
+                vacuumOriginalEmissionColors,
+                false,
+                turboPumpEmissionColor,
+                turboPumpEmissionIntensity
+            );
         }
 
         Debug.Log(
@@ -678,13 +653,13 @@ public class AlphaEPowerController : MonoBehaviour
         {
             currentGasType = value;
 
-            // 真空系統已完成，保留淡暗藍色
+            // 真空系統步驟已完成，恢復原色
             ApplyEmission(
                 vacuumMaterials,
                 vacuumOriginalEmissionColors,
-                true,
-                completedEmissionColor,
-                completedEmissionIntensity
+                false,
+                turboPumpEmissionColor,
+                turboPumpEmissionIntensity
             );
 
             // Gas Supply 是目前步驟，使用橘黃色高亮
@@ -869,13 +844,13 @@ public class AlphaEPowerController : MonoBehaviour
 
         if (turnOn)
         {
-            // MFC 已完成，但仍持續控制流量
+            // MFC 步驟已完成，恢復原色
             ApplyEmission(
                 gasSupplyMaterials,
                 gasSupplyOriginalEmissionColors,
-                true,
-                completedEmissionColor,
-                completedEmissionIntensity
+                false,
+                mfcEmissionColor,
+                mfcEmissionIntensity
             );
 
             // Cooler 是目前操作步驟
@@ -977,15 +952,15 @@ public class AlphaEPowerController : MonoBehaviour
         if (turnOn)
         {
             // Cooler 已完成，保留淡暗藍色
-            
+
             ApplyEmission(
                 coolerMaterials,
                 coolerOriginalEmissionColors,
-                true,
-                completedEmissionColor,
-                completedEmissionIntensity
+                false,
+                coolerEmissionColor,
+                coolerEmissionIntensity
             );
-            
+
 
             // High Voltage 為目前操作步驟
             ApplyEmission(
@@ -1081,8 +1056,16 @@ public class AlphaEPowerController : MonoBehaviour
 
         if (turnOn)
         {
-            // High Voltage 保持原本亮色，不修改
+            // High Voltage 步驟完成，恢復原色
+            ApplyEmission(
+                highVoltageMaterials,
+                highVoltageOriginalEmissionColors,
+                false,
+                highVoltageEmissionColor,
+                highVoltageEmissionIntensity
+            );
 
+            // Microwave 為目前步驟
             ApplyEmission(
                 microwaveMaterials,
                 microwaveOriginalEmissionColors,
@@ -1154,13 +1137,13 @@ public class AlphaEPowerController : MonoBehaviour
         );
     }
 
-    
+
     private void CacheMaterials(
-        GameObject targetGroup,
-        List<Material> materialList,
-        List<Color> originalColorList,
-        string groupName
-    )
+    GameObject targetGroup,
+    List<Material> materialList,
+    List<Color> originalColorList,
+    string groupName
+)
     {
         materialList.Clear();
         originalColorList.Clear();
@@ -1175,37 +1158,34 @@ public class AlphaEPowerController : MonoBehaviour
         }
 
         Renderer[] renderers =
-            targetGroup.GetComponentsInChildren<Renderer>(
-                true
-            );
+            targetGroup.GetComponentsInChildren<Renderer>(true);
 
         foreach (Renderer targetRenderer in renderers)
         {
-            foreach (
-                Material material in targetRenderer.materials
-            )
+            foreach (Material material in targetRenderer.materials)
             {
-                if (
-                    !material.HasProperty(
-                        EmissionColorId
-                    )
-                )
+                if (material == null)
+                {
+                    continue;
+                }
+
+                // Standard Shader 的基本顏色
+                if (!material.HasProperty("_Color"))
                 {
                     continue;
                 }
 
                 materialList.Add(material);
 
+                // 記住每一個零件原本的顏色
                 originalColorList.Add(
-                    material.GetColor(
-                        EmissionColorId
-                    )
+                    material.GetColor("_Color")
                 );
             }
         }
 
         Debug.Log(
-            $"{groupName} 找到 {materialList.Count} 個可發光材質。"
+            $"{groupName} 找到 {materialList.Count} 個可變色材質。"
         );
     }
 
@@ -1213,34 +1193,54 @@ public class AlphaEPowerController : MonoBehaviour
         List<Material> materials,
         List<Color> originalColors,
         bool enabled,
-        Color emissionColor,
+        Color targetColor,
         float intensity
     )
     {
-        Debug.Log(
-    "[EMISSION] enabled = " + enabled +
-    " | materials = " + materials.Count +
-    " | color = " + emissionColor +
-    " | intensity = " + intensity
-);
-
         for (int i = 0; i < materials.Count; i++)
         {
             Material material = materials[i];
 
+            if (material == null)
+            {
+                continue;
+            }
+
+            if (!material.HasProperty("_Color"))
+            {
+                continue;
+            }
+
             if (enabled)
             {
-                material.EnableKeyword("_EMISSION");
+                /*
+                 * 不使用 Emission。
+                 *
+                 * 保留模型原本材質，
+                 * 只混入一部分設備代表色。
+                 *
+                 * intensity：
+                 * 0   = 完全原色
+                 * 0.3 = 淡淡變色
+                 * 0.5 = 明顯變色
+                 * 1   = 完全變成指定顏色
+                 */
+                Color tintedColor = Color.Lerp(
+                    originalColors[i],
+                    targetColor,
+                    intensity
+                );
 
                 material.SetColor(
-                    EmissionColorId,
-                    emissionColor * intensity
+                    "_Color",
+                    tintedColor
                 );
             }
             else
             {
+                // 關閉時完整恢復模型原本顏色
                 material.SetColor(
-                    EmissionColorId,
+                    "_Color",
                     originalColors[i]
                 );
             }
@@ -1384,87 +1384,27 @@ public class AlphaEPowerController : MonoBehaviour
         );
     }
 
-#if UNITY_EDITOR
-
-    /*
-     * WebGL Build 前使用：
-     * 將所有 Alpha-E 控制群組的 Material
-     * 預先啟用 _EMISSION Shader Keyword。
-     *
-     * 初始 Emission Color 設為黑色，
-     * 所以模型一開始不會發亮，
-     * 但 WebGL Build 會保留 Emission Shader Variant。
-     */
-    [ContextMenu("Prepare Emission Materials For WebGL")]
-    private void PrepareEmissionMaterialsForWebGL()
+    [ContextMenu("TEST Force Vacuum Pink")]
+    private void TestForceVacuumPink()
     {
-        PrepareGroupEmission(
-            powerControlGroup,
-            "Power Control"
-        );
-
-        PrepareGroupEmission(
-            vacuumChamberGroup,
-            "Vacuum Chamber"
-        );
-
-        PrepareGroupEmission(
-            coolerGroup,
-            "Cooler"
-        );
-
-        PrepareGroupEmission(
-            gasSupplyGroup,
-            "Gas Supply"
-        );
-
-        PrepareGroupEmission(
-            highVoltageGroup,
-            "High Voltage"
-        );
-
-        PrepareGroupEmission(
-            microwaveGroup,
-            "Microwave"
-        );
-
-        AssetDatabase.SaveAssets();
-
-        Debug.Log(
-            "Alpha-E 所有可發光 Material 已準備完成，" +
-            "可以重新 Build WebGL。"
-        );
-    }
-
-
-    private void PrepareGroupEmission(
-        GameObject group,
-        string groupName
-    )
-    {
-        if (group == null)
+        if (vacuumChamberGroup == null)
         {
-            Debug.LogWarning(
-                groupName + " 尚未指定。"
-            );
-
+            Debug.LogError("vacuumChamberGroup 是空的");
             return;
         }
 
         Renderer[] renderers =
-            group.GetComponentsInChildren<Renderer>(true);
+            vacuumChamberGroup.GetComponentsInChildren<Renderer>(true);
 
-        int count = 0;
+        int rendererCount = 0;
+        int materialCount = 0;
 
-        foreach (Renderer renderer in renderers)
+        foreach (Renderer targetRenderer in renderers)
         {
-            /*
-             * 注意這裡使用 sharedMaterials，
-             * 修改真正的 Material Asset，
-             * 而不是 Runtime Instance。
-             */
+            rendererCount++;
+
             Material[] materials =
-                renderer.sharedMaterials;
+                targetRenderer.materials;
 
             foreach (Material material in materials)
             {
@@ -1473,27 +1413,27 @@ public class AlphaEPowerController : MonoBehaviour
                     continue;
                 }
 
-                if (!material.HasProperty("_EmissionColor"))
+                /*
+                 * Standard Shader 使用 _Color。
+                 * 不碰 Emission。
+                 */
+                if (material.HasProperty("_Color"))
                 {
-                    continue;
+                    material.SetColor(
+                        "_Color",
+                        Color.magenta
+                    );
+
+                    materialCount++;
                 }
-
-                material.EnableKeyword("_EMISSION");
-
-                EditorUtility.SetDirty(material);
-
-                count++;
             }
         }
 
         Debug.Log(
-            "[WEBGL EMISSION] " +
-            groupName +
-            "：已準備 " +
-            count +
-            " 個 Material。"
+            "[PINK TEST] Renderers = " +
+            rendererCount +
+            " | Materials changed = " +
+            materialCount
         );
     }
-
-#endif
 }
