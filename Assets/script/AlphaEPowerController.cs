@@ -177,6 +177,10 @@ public class AlphaEPowerController : MonoBehaviour
 
     private void Awake()
     {
+        Debug.Log(
+            "=== ALPHA-E BASE COLOR BUILD 2026-09-10 V1 ==="
+        );
+
         CacheMaterials(
             powerControlGroup,
             powerMaterials,
