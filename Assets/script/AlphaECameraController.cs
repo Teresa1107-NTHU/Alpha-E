@@ -38,9 +38,20 @@ public class AlphaECameraController : MonoBehaviour
     [SerializeField]
     private float maxZoomRatio = 2.5f;
 
+    [Header("觸控設定")]
+    [SerializeField]
+    private float touchRotationSpeed = 0.15f;
+
+    [SerializeField]
+    private float touchPanSpeed = 0.0025f;
+
+    [SerializeField]
+    private float pinchZoomSpeed = 0.01f;
+
 
     private Vector3 initialPosition;
     private Quaternion initialRotation;
+    private Vector3 initialTargetPosition;
 
     private float distance;
     private float initialDistance;
@@ -57,6 +68,9 @@ public class AlphaECameraController : MonoBehaviour
 
         if (target != null)
         {
+            initialTargetPosition =
+                target.position;
+
             distance =
                 Vector3.Distance(
                     transform.position,
@@ -76,13 +90,22 @@ public class AlphaECameraController : MonoBehaviour
             return;
         }
 
-
-        HandleRotation();
-
-        HandlePan();
-
-        HandleZoom();
-
+        /*
+         * 平板 / 手機觸控
+         */
+        if (Input.touchCount > 0)
+        {
+            HandleTouch();
+        }
+        else
+        {
+            /*
+             * 電腦滑鼠
+             */
+            HandleRotation();
+            HandlePan();
+            HandleZoom();
+        }
 
         if (Input.GetKeyDown(KeyCode.R))
         {
@@ -90,6 +113,183 @@ public class AlphaECameraController : MonoBehaviour
         }
     }
 
+    private void HandleTouch()
+    {
+        /*
+         * =========================
+         * 單指：旋轉
+         * =========================
+         */
+        if (Input.touchCount == 1)
+        {
+            Touch touch =
+                Input.GetTouch(0);
+
+            if (
+                touch.phase ==
+                    TouchPhase.Moved
+            )
+            {
+                Vector2 delta =
+                    touch.deltaPosition;
+
+                transform.RotateAround(
+                    target.position,
+                    Vector3.up,
+                    delta.x *
+                    touchRotationSpeed
+                );
+
+                transform.RotateAround(
+                    target.position,
+                    transform.right,
+                    -delta.y *
+                    touchRotationSpeed
+                );
+
+                transform.LookAt(
+                    target.position
+                );
+            }
+
+            return;
+        }
+
+
+        /*
+         * =========================
+         * 雙指：平移 + 捏合縮放
+         * =========================
+         */
+        if (Input.touchCount >= 2)
+        {
+            Touch touch0 =
+                Input.GetTouch(0);
+
+            Touch touch1 =
+                Input.GetTouch(1);
+
+
+            /*
+             * -------------------------
+             * 雙指平移
+             * -------------------------
+             */
+
+            Vector2 averageDelta =
+                (
+                    touch0.deltaPosition +
+                    touch1.deltaPosition
+                )
+                * 0.5f;
+
+            Vector3 move =
+                (
+                    -transform.right *
+                    averageDelta.x
+                    -
+                    transform.up *
+                    averageDelta.y
+                )
+                *
+                touchPanSpeed
+                *
+                distance;
+
+            transform.position +=
+                move;
+
+            target.position +=
+                move;
+
+
+            /*
+             * -------------------------
+             * 雙指捏合縮放
+             * -------------------------
+             */
+
+            Vector2 previousTouch0 =
+                touch0.position -
+                touch0.deltaPosition;
+
+            Vector2 previousTouch1 =
+                touch1.position -
+                touch1.deltaPosition;
+
+
+            float previousDistance =
+                Vector2.Distance(
+                    previousTouch0,
+                    previousTouch1
+                );
+
+            float currentTouchDistance =
+                Vector2.Distance(
+                    touch0.position,
+                    touch1.position
+                );
+
+
+            float pinchDelta =
+                currentTouchDistance -
+                previousDistance;
+
+
+            float currentDistance =
+                Vector3.Distance(
+                    transform.position,
+                    target.position
+                );
+
+
+            float minDistance =
+                initialDistance *
+                minZoomRatio;
+
+            float maxDistance =
+                initialDistance *
+                maxZoomRatio;
+
+
+            float newDistance =
+                currentDistance
+                -
+                pinchDelta *
+                pinchZoomSpeed;
+
+
+            newDistance =
+                Mathf.Clamp(
+                    newDistance,
+                    minDistance,
+                    maxDistance
+                );
+
+
+            Vector3 direction =
+                (
+                    transform.position -
+                    target.position
+                ).normalized;
+
+
+            transform.position =
+                target.position
+                +
+                direction *
+                newDistance;
+
+
+            transform.LookAt(
+                target.position
+            );
+
+
+            distance =
+                newDistance;
+        }
+    }
 
     /*
      * 左鍵拖曳：
@@ -265,6 +465,11 @@ public class AlphaECameraController : MonoBehaviour
         transform.rotation =
             initialRotation;
 
+        if (target != null)
+        {
+            target.position =
+                initialTargetPosition;
+        }
 
         distance =
             Vector3.Distance(
