@@ -136,13 +136,13 @@
 
         var config = {
             dataUrl:
-                buildUrl + "/WebGL.data",
+                buildUrl + "/WebGL.data.unityweb",
 
             frameworkUrl:
-                buildUrl + "/WebGL.framework.js",
+                buildUrl + "/WebGL.framework.js.unityweb",
 
             codeUrl:
-                buildUrl + "/WebGL.wasm",
+                buildUrl + "/WebGL.wasm.unityweb",
 
             streamingAssetsUrl: "StreamingAssets",
             companyName: "DefaultCompany",
@@ -179,7 +179,7 @@
 
         // To lower canvas resolution on mobile devices to gain some
         // performance, uncomment the following line:
-        // config.devicePixelRatio = 1;
+        config.devicePixelRatio = 1;
 
 
       } else {
