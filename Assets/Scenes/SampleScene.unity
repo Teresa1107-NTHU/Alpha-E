@@ -1611,8 +1611,8 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 963194225}
   serializedVersion: 2
-  m_LocalRotation: {x: 0.035941552, y: 0.69529134, z: -0.034454525, w: 0.7170015}
-  m_LocalPosition: {x: -3.159393, y: 1.3633513, z: -2.3187985}
+  m_LocalRotation: {x: 0.06830595, y: 0.72314405, z: -0.071860865, w: 0.68354446}
+  m_LocalPosition: {x: -3.384495, y: 1.5102124, z: -2.080107}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -1636,6 +1636,8 @@ MonoBehaviour:
   zoomSpeed: 0.5
   minZoomRatio: 0.5
   maxZoomRatio: 2.5
+  touchRotationSpeed: 0.15
+  pinchZoomSpeed: 0.01
 --- !u!1 &1165732391
 GameObject:
   m_ObjectHideFlags: 0
@@ -2226,6 +2228,7 @@ MonoBehaviour:
   highVoltageEmissionIntensity: 0.5
   microwaveEmissionColor: {r: 0.32039872, g: 0.9056604, b: 0.60704553, a: 1}
   microwaveEmissionIntensity: 0.7
+  cameraController: {fileID: 963194229}
 --- !u!4 &2023312916
 Transform:
   m_ObjectHideFlags: 0

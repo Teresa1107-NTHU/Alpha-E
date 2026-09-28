@@ -253,6 +253,14 @@
                                 );
                                 break;
 
+                            case "ResetView":
+                                unityInstance.SendMessage(
+                                    "AlphaEWebController",
+                                    "ResetView",
+                                    message.action || "reset"
+                                );
+                                break;
+
                             /* =========================
                                一般設備
                             ========================= */

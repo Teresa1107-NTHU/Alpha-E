@@ -43,9 +43,6 @@ public class AlphaECameraController : MonoBehaviour
     private float touchRotationSpeed = 0.15f;
 
     [SerializeField]
-    private float touchPanSpeed = 0.0025f;
-
-    [SerializeField]
     private float pinchZoomSpeed = 0.01f;
 
 
@@ -55,6 +52,10 @@ public class AlphaECameraController : MonoBehaviour
 
     private float distance;
     private float initialDistance;
+
+    private bool twoFingerInitialized = false;
+
+    private float previousPinchDistance;
 
 
     private void Start()
@@ -122,12 +123,14 @@ public class AlphaECameraController : MonoBehaviour
          */
         if (Input.touchCount == 1)
         {
+            twoFingerInitialized = false;
+
             Touch touch =
                 Input.GetTouch(0);
 
             if (
                 touch.phase ==
-                    TouchPhase.Moved
+                TouchPhase.Moved
             )
             {
                 Vector2 delta =
@@ -158,7 +161,7 @@ public class AlphaECameraController : MonoBehaviour
 
         /*
          * =========================
-         * 雙指：平移 + 捏合縮放
+         * 雙指：只做縮放
          * =========================
          */
         if (Input.touchCount >= 2)
@@ -170,125 +173,101 @@ public class AlphaECameraController : MonoBehaviour
                 Input.GetTouch(1);
 
 
-            /*
-             * -------------------------
-             * 雙指平移
-             * -------------------------
-             */
-
-            Vector2 averageDelta =
-                (
-                    touch0.deltaPosition +
-                    touch1.deltaPosition
-                )
-                * 0.5f;
-
-            Vector3 move =
-                (
-                    -transform.right *
-                    averageDelta.x
-                    -
-                    transform.up *
-                    averageDelta.y
-                )
-                *
-                touchPanSpeed
-                *
-                distance;
-
-            transform.position +=
-                move;
-
-            target.position +=
-                move;
-
-
-            /*
-             * -------------------------
-             * 雙指捏合縮放
-             * -------------------------
-             */
-
-            Vector2 previousTouch0 =
-                touch0.position -
-                touch0.deltaPosition;
-
-            Vector2 previousTouch1 =
-                touch1.position -
-                touch1.deltaPosition;
-
-
-            float previousDistance =
-                Vector2.Distance(
-                    previousTouch0,
-                    previousTouch1
-                );
-
-            float currentTouchDistance =
+            float currentPinchDistance =
                 Vector2.Distance(
                     touch0.position,
                     touch1.position
                 );
 
 
+            /*
+             * 第一次雙指接觸時只記錄距離
+             */
+            if (!twoFingerInitialized)
+            {
+                previousPinchDistance =
+                    currentPinchDistance;
+
+                twoFingerInitialized =
+                    true;
+
+                return;
+            }
+
+
             float pinchDelta =
-                currentTouchDistance -
-                previousDistance;
+                currentPinchDistance -
+                previousPinchDistance;
 
 
-            float currentDistance =
-                Vector3.Distance(
-                    transform.position,
+            if (
+                Mathf.Abs(pinchDelta) >
+                1f
+            )
+            {
+                float currentDistance =
+                    Vector3.Distance(
+                        transform.position,
+                        target.position
+                    );
+
+
+                float minDistance =
+                    initialDistance *
+                    minZoomRatio;
+
+                float maxDistance =
+                    initialDistance *
+                    maxZoomRatio;
+
+
+                float newDistance =
+                    currentDistance
+                    -
+                    pinchDelta *
+                    pinchZoomSpeed;
+
+
+                newDistance =
+                    Mathf.Clamp(
+                        newDistance,
+                        minDistance,
+                        maxDistance
+                    );
+
+
+                Vector3 direction =
+                    (
+                        transform.position -
+                        target.position
+                    ).normalized;
+
+
+                transform.position =
+                    target.position
+                    +
+                    direction *
+                    newDistance;
+
+
+                transform.LookAt(
                     target.position
                 );
 
 
-            float minDistance =
-                initialDistance *
-                minZoomRatio;
-
-            float maxDistance =
-                initialDistance *
-                maxZoomRatio;
+                distance =
+                    newDistance;
+            }
 
 
-            float newDistance =
-                currentDistance
-                -
-                pinchDelta *
-                pinchZoomSpeed;
+            previousPinchDistance =
+                currentPinchDistance;
 
-
-            newDistance =
-                Mathf.Clamp(
-                    newDistance,
-                    minDistance,
-                    maxDistance
-                );
-
-
-            Vector3 direction =
-                (
-                    transform.position -
-                    target.position
-                ).normalized;
-
-
-            transform.position =
-                target.position
-                +
-                direction *
-                newDistance;
-
-
-            transform.LookAt(
-                target.position
-            );
-
-
-            distance =
-                newDistance;
+            return;
         }
+
+
+        twoFingerInitialized = false;
     }
 
     /*

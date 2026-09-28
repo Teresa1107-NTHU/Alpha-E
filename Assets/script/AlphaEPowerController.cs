@@ -14,7 +14,6 @@ public class AlphaEPowerController : MonoBehaviour
     [SerializeField]
     private AlphaEFlowManager flowManager;
 
-
     [Header("Power Control 模型")]
     [SerializeField]
     private GameObject powerControlGroup;
@@ -106,7 +105,6 @@ public class AlphaEPowerController : MonoBehaviour
     [SerializeField]
     private float coolerEmissionIntensity = 0.45f;
 
-
     [Header("High Voltage 顏色設定")]
     [SerializeField]
     private Color highVoltageEmissionColor =
@@ -115,7 +113,6 @@ public class AlphaEPowerController : MonoBehaviour
     [SerializeField]
     private float highVoltageEmissionIntensity = 0.45f;
 
-
     [Header("Microwave 顏色設定")]
     [SerializeField]
     private Color microwaveEmissionColor =
@@ -123,6 +120,9 @@ public class AlphaEPowerController : MonoBehaviour
 
     [SerializeField]
     private float microwaveEmissionIntensity = 0.45f;
+
+    [SerializeField]
+    private AlphaECameraController cameraController;
 
     private bool isPowerOn;
     private bool isRoughPumpOn;
@@ -299,6 +299,24 @@ public class AlphaEPowerController : MonoBehaviour
     private void Update()
     {
         UpdateFanRotation();
+    }
+
+    public void ResetView(string command)
+    {
+        if (cameraController == null)
+        {
+            Debug.LogWarning(
+                "尚未指定 AlphaECameraController。"
+            );
+
+            return;
+        }
+
+        cameraController.ResetView();
+
+        Debug.Log(
+            "Alpha-E Camera View Reset"
+        );
     }
 
     /*
