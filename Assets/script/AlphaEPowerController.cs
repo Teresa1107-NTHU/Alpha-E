@@ -434,6 +434,8 @@ public class AlphaEPowerController : MonoBehaviour
             }
         }
 
+        RefreshActiveStepHighlight();
+
         Debug.Log(
             $"Alpha-E Power：{(turnOn ? "On" : "Off")}"
         );
@@ -537,6 +539,8 @@ public class AlphaEPowerController : MonoBehaviour
             }
         }
 
+        RefreshActiveStepHighlight();
+
         Debug.Log(
             $"Rough Pump：{(turnOn ? "On" : "Off")}"
         );
@@ -619,6 +623,8 @@ public class AlphaEPowerController : MonoBehaviour
                 turboPumpEmissionIntensity
             );
         }
+
+        RefreshActiveStepHighlight();
 
         Debug.Log(
             $"Turbo Pump：{(turnOn ? "On" : "Off")}"
@@ -713,6 +719,8 @@ public class AlphaEPowerController : MonoBehaviour
                 gasSupplyEmissionIntensity
             );
         }
+
+        RefreshActiveStepHighlight();
 
         Debug.Log(
             turnOn
@@ -814,6 +822,8 @@ public class AlphaEPowerController : MonoBehaviour
             }
         }
 
+        RefreshActiveStepHighlight();
+
         Debug.Log(
             $"MFC：{(turnOn ? "On" : "Off")}"
         );
@@ -911,6 +921,8 @@ public class AlphaEPowerController : MonoBehaviour
                 highVoltageEmissionIntensity
             );
         }
+
+        RefreshActiveStepHighlight();
 
         Debug.Log(
             $"Cooler：{(turnOn ? "On" : "Off")}"
@@ -1025,6 +1037,8 @@ public class AlphaEPowerController : MonoBehaviour
             
         }
 
+        RefreshActiveStepHighlight();
+
         Debug.Log(
             $"High Voltage：{(turnOn ? "On" : "Off")}"
         );
@@ -1126,11 +1140,234 @@ public class AlphaEPowerController : MonoBehaviour
             }
         }
 
+        RefreshActiveStepHighlight();
+
         Debug.Log(
             $"Microwave：{(turnOn ? "On" : "Off")}"
         );
     }
 
+    /*
+ * 根據目前有效的操作流程，
+ * 統一更新模型高亮。
+ *
+ * 規則：
+ * 只顯示流程中「最後一個仍然有效的步驟」，
+ * 不讓多個設備同時保持操作顏色。
+ */
+    private void RefreshActiveStepHighlight()
+    {
+        /*
+         * 先全部恢復原始顏色。
+         */
+        ApplyEmission(
+            powerMaterials,
+            powerOriginalEmissionColors,
+            false,
+            powerEmissionColor,
+            powerEmissionIntensity
+        );
+
+        ApplyEmission(
+            vacuumMaterials,
+            vacuumOriginalEmissionColors,
+            false,
+            roughPumpEmissionColor,
+            roughPumpEmissionIntensity
+        );
+
+        ApplyEmission(
+            gasSupplyMaterials,
+            gasSupplyOriginalEmissionColors,
+            false,
+            gasSupplyEmissionColor,
+            gasSupplyEmissionIntensity
+        );
+
+        ApplyEmission(
+            coolerMaterials,
+            coolerOriginalEmissionColors,
+            false,
+            coolerEmissionColor,
+            coolerEmissionIntensity
+        );
+
+        ApplyEmission(
+            highVoltageMaterials,
+            highVoltageOriginalEmissionColors,
+            false,
+            highVoltageEmissionColor,
+            highVoltageEmissionIntensity
+        );
+
+        ApplyEmission(
+            microwaveMaterials,
+            microwaveOriginalEmissionColors,
+            false,
+            microwaveEmissionColor,
+            microwaveEmissionIntensity
+        );
+
+
+        /*
+         * Power 已關閉：
+         * 所有設備保持原色。
+         */
+        if (!isPowerOn)
+        {
+            return;
+        }
+
+
+        /*
+         * 從最後面的步驟往前判斷。
+         *
+         * 不只判斷該設備本身是否 On，
+         * 還要求前面的流程仍然成立。
+         */
+
+        if (
+            isMicrowaveOn &&
+            isHighVoltageOn &&
+            isCoolerOn &&
+            isMfcOn &&
+            isGasSupplyOn &&
+            isTurboPumpOn &&
+            isRoughPumpOn
+        )
+        {
+            ApplyEmission(
+                microwaveMaterials,
+                microwaveOriginalEmissionColors,
+                true,
+                microwaveEmissionColor,
+                microwaveEmissionIntensity
+            );
+
+            return;
+        }
+
+
+        if (
+            isHighVoltageOn &&
+            isCoolerOn &&
+            isMfcOn &&
+            isGasSupplyOn &&
+            isTurboPumpOn &&
+            isRoughPumpOn
+        )
+        {
+            ApplyEmission(
+                highVoltageMaterials,
+                highVoltageOriginalEmissionColors,
+                true,
+                highVoltageEmissionColor,
+                highVoltageEmissionIntensity
+            );
+
+            return;
+        }
+
+
+        if (
+            isCoolerOn &&
+            isMfcOn &&
+            isGasSupplyOn &&
+            isTurboPumpOn &&
+            isRoughPumpOn
+        )
+        {
+            ApplyEmission(
+                coolerMaterials,
+                coolerOriginalEmissionColors,
+                true,
+                coolerEmissionColor,
+                coolerEmissionIntensity
+            );
+
+            return;
+        }
+
+
+        if (
+            isMfcOn &&
+            isGasSupplyOn &&
+            isTurboPumpOn &&
+            isRoughPumpOn
+        )
+        {
+            ApplyEmission(
+                gasSupplyMaterials,
+                gasSupplyOriginalEmissionColors,
+                true,
+                mfcEmissionColor,
+                mfcEmissionIntensity
+            );
+
+            return;
+        }
+
+
+        if (
+            isGasSupplyOn &&
+            isTurboPumpOn &&
+            isRoughPumpOn
+        )
+        {
+            ApplyEmission(
+                gasSupplyMaterials,
+                gasSupplyOriginalEmissionColors,
+                true,
+                gasSupplyEmissionColor,
+                gasSupplyEmissionIntensity
+            );
+
+            return;
+        }
+
+
+        if (
+            isTurboPumpOn &&
+            isRoughPumpOn
+        )
+        {
+            ApplyEmission(
+                vacuumMaterials,
+                vacuumOriginalEmissionColors,
+                true,
+                turboPumpEmissionColor,
+                turboPumpEmissionIntensity
+            );
+
+            return;
+        }
+
+
+        if (isRoughPumpOn)
+        {
+            ApplyEmission(
+                vacuumMaterials,
+                vacuumOriginalEmissionColors,
+                true,
+                roughPumpEmissionColor,
+                roughPumpEmissionIntensity
+            );
+
+            return;
+        }
+
+
+        /*
+         * Power On，但尚未進入 Rough Pump。
+         */
+        ApplyEmission(
+            powerMaterials,
+            powerOriginalEmissionColors,
+            true,
+            powerEmissionColor,
+            powerEmissionIntensity
+        );
+    }
     private void UpdateFanRotation()
     {
         float targetSpeed =
